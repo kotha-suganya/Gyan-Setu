@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Gyan Setu - Teacher Access</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600&family=Nunito:wght@400;700&family=Poppins:wght@700&display=swap" rel="stylesheet" />
+    
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --secondary: #FF6584;
+            --accent: #57E2A0;
+            --soft: #FFE6E6;
+            --dark: #22223B;
+            --text: #343459;
+            /* Matches the soft gradient from your selection page */
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --shadow: 0 8px 24px rgba(0,0,0,0.08);
+            --blossom-color: #FF69B4;
+            --logoblue: #3B5998;
+            --tagline-green: #2E8B57;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text);
+            font-family: 'Nunito', 'Quicksand', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .login-container {
+            max-width: 400px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+        }
+
+        header {
+            width: 100%;
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--logoblue);
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            animation: moveUpDown 3s ease-in-out infinite;
+        }
+
+        .logo .blossom {
+            font-size: 2rem;
+            margin: 0 8px;
+            color: var(--blossom-color);
+            animation: blossomPulse 2.5s infinite ease-in-out;
+        }
+
+        @keyframes blossomPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes moveUpDown {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .tagline {
+            margin-top: 8px;
+            font-size: 1.2rem;
+            color: var(--tagline-green);
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 600;
+        }
+
+        .role-badge {
+            background: var(--soft);
+            color: var(--secondary);
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn {
+            width: 100%;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            color: white;
+            border-radius: 30px;
+            font-weight: bold;
+            padding: 15px;
+            cursor: pointer;
+            border: none;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(108, 99, 255, 0.2);
+            text-decoration: none;
+            display: block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(108, 99, 255, 0.3);
+            filter: brightness(1.1);
+        }
+
+        .signup-btn {
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+        }
+
+        .back-link {
+            margin-top: 10px;
+            color: var(--logoblue);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <header>
+        <!-- <div class="role-badge"><i class="fas fa-chalkboard-teacher"></i> Teacher Portal</div> -->
+        <div class="logo"><span class="blossom">🌸</span>Gyan Setu<span class="blossom">🌸</span></div>
+        <div class="tagline">Empowering Educators</div>
+    </header>
+
+    <button class="btn" onclick="window.location.href='teachsignup.html'">Teacher Sign Up</button>
+    <button class="btn signup-btn" onclick="window.location.href='teachsignin.html'">Teacher Sign In</button>
+    
+    <a href="first.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Role Selection</a>
+</div>
+
+</body>
+</html>

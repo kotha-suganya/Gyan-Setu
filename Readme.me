@@ -1,0 +1,79 @@
+
+
+
+
+
+MAIN CHATBOT
+1)Creating virtual env
+    python -m venv venv
+    .\venv\Scripts\activate
+    if error occors in the before step put below line  
+    ---------------------------------------------------------------------------------------------------
+    ERROR
+    (& : File D:\SIH 1\venv\Scripts\Activate.ps1 cannot be loaded because running scripts is disabled on this system. For 
+more information, see about_Execution_Policies at https:/go.microsoft.com/fwlink/?LinkID=135170.
+At line:1 char:3
++ & "D:/SIH 1/venv/Scripts/Activate.ps1"
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : SecurityError: (:) [], PSSecurityException
+    + FullyQualifiedErrorId : UnauthorizedAccess)
+    ---------------------------------------------------------------------------------------------------
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+
+
+2)CREATE A .env file and put below
+    GEMINI_API_KEY=your_google_gemini_api_key_here
+    YOUTUBE_API_KEY=your_youtube_data_api_key_here
+
+
+3)pip install Flask
+pip install flask_cors
+pip install python-dotenv
+pip install google-generativeai
+pip install google-api-python-client
+
+
+
+
+
+
+STORYBOT:
+1)pip install Flask
+  pip install google-generativeai
+2)app.py
+3)storybot.html
+4)pip install Flask google-generativeai flask-cors
+5)cd "C:\Users\Lavanya_D\Desktop\SIH 2\SIH 1"
+6)$env:GEMINI_API_KEY="your_key_here"
+7)python app.py
+
+
+EVERYTIME WHILE RUNNING THE CODE:
+    1) Get-ExecutionPolicy
+    2) Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+    3) .\venv\Scripts\activate
+
+
+
+RUNNING CHATBOT:
+$env:FLASK_APP = "chatbot.py"
+python -m flask run
+
+
+RUNNING STORYBOT:
+$env:FLASK_APP = "storybot.py"
+python -m flask run --port 5001
+
+
+RUNNING QUIZ:
+$env:FLASK_APP = "quiz.py"
+python -m flask run --port 5003
+
+
+RUNNING VISUALIZER:
+$env:FLASK_APP = "visualizer.py"
+python -m flask run --port 5002
+
+
+CHATBOT :
+pip install flask flask-cors python-docx PyPDF2 google-generativeai google-api-python-client

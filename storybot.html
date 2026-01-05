@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <title>StoryBot: Ask Me Anything!</title>
+    <style>
+        /* Basic CSS for styling */
+        :root {
+            --primary: #6C63FF;
+            --secondary: #FF6584;
+            --accent: #57E2A0;
+            --soft: #FFE6E6;
+            --dark: #22223B;
+            --text: #343459;
+            --video-gradient: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            --card-gradient: linear-gradient(120deg, #FCF6FF 60%, #D6FCFF 100%);
+            --shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+        body {
+            font-family: 'Nunito', 'Quicksand', sans-serif;
+            background: var(--video-gradient);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 80vh; /* or desired height */
+            max-width: 700px;
+        }
+        #response-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            border: 1.5px solid var(--primary);
+            border-radius: 15px;
+            padding: 150px;
+            background-color: var(--soft);
+            box-shadow: var(--shadow);
+            margin-bottom: 15px;
+        }
+        .input-area {
+            position: sticky;
+            bottom: 0;
+            display: flex;
+            gap: 10px;
+            background: var(--card-gradient);
+            padding: 12px 20px;
+            border: 1px solid #dedff0;
+            border-radius: 25px;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+        .input-area input[type="text"] {
+            flex-grow: 1;
+            padding: 12px 20px;
+            font-size: 1.1em;
+            border: none;
+            outline: none;
+            border-radius: 25px;
+            background: var(--soft);
+            color: var(--dark);
+        }
+        .input-area button {
+            padding: 12px 25px;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .input-area button:hover {
+            background: linear-gradient(to left, var(--secondary), var(--primary));
+        }
+        h1 {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            background-clip: text;
+            color: transparent;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 2.2rem;
+            margin-bottom: 18px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+        }
+        .controls-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+        .controls-area label {
+            color: var(--dark);
+        }
+        .controls-area select {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #dedff0;
+            font-size: 0.95em;
+            background-color: var(--soft);
+            outline: none;
+            cursor: pointer;
+            color: var(--dark);
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1em;
+            background: transparent;
+            outline: none;
+            color: var(--dark);
+        }
+        button {
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 0 25px 25px 0;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: linear-gradient(to left, var(--secondary), var(--primary));
+        }
+        .user-question {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        .story-explanation {
+            background: var(--soft);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid var(--primary);
+            color: var(--dark);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .error-message {
+            color: var(--secondary);
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* NEW: Back button styling */
+.back-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    font-size: 1.18rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+.back-btn:hover {
+    background: var(--secondary);
+}
+    </style>
+</head>
+<body>
+    <!-- <button class="back-btn" onclick="window.location.href='http://127.0.0.1:5000/';" title="Back to subjects">
+    <i class="fas fa-arrow-left"></i>
+</button> -->
+
+<button class="back-btn" onclick="history.back();" title="Back to subjects">
+    <i class="fas fa-arrow-left"></i>
+</button>
+
+    <div class="chat-container">
+        <h1>StoryBot: Ask Me Anything!</h1>
+        <p>Type your question below, and I'll explain it in a short, engaging story.</p>
+        <div class="controls-area">
+            <label for="genreSelect">Genre:</label>
+            <select id="genreSelect">
+                <option value="general">General</option>
+                <option value="fantasy">Fantasy</option>
+                <option value="sci-fi">Sci-Fi</option>
+                <option value="mystery">Mystery</option>
+                <option value="adventure">Adventure</option>
+                <option value="historical">Historical</option>
+                <option value="humorous">Humorous</option>
+            </select>
+            <label for="ageSelect">Age Group:</label>
+            <select id="ageSelect">
+                <option value="all_ages">All Ages</option>
+                <option value="kids">Kids</option>
+                <option value="teens">Teens</option>
+                <option value="adults">Adults</option>
+            </select>
+            <label for="lengthSelect">Length:</label>
+            <select id="lengthSelect">
+                <option value="short">Short (4-5 sentences)</option>
+                <option value="medium">Medium (8-10 sentences)</option>
+                <option value="long">Long (15-20 sentences)</option>
+            </select>
+        </div>
+        <div id="response-area">
+        </div>
+        <div class="input-area">
+            <input type="text" id="questionInput" placeholder="e.g., How does a rainbow form?">
+            <button onclick="askQuestion()">Ask StoryBot</button>
+        </div>
+        <div class="loading-spinner" id="loadingSpinner"></div>
+    </div>
+    <script>
+        const chatHistory = [];
+        const questionInput = document.getElementById('questionInput');
+        const genreSelect = document.getElementById('genreSelect');
+        const ageSelect = document.getElementById('ageSelect');
+        const lengthSelect = document.getElementById('lengthSelect');
+        const responseArea = document.getElementById('response-area');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const BACKEND_URL = 'http://127.0.0.1:5001/ask';
+
+
+        
+        // Hardcoded responses for a better user experience
+        // const inbuiltResponses = {
+        //     "hello": "Hello there! 🌟 StoryBot is here to turn your curiosity into a fun story.",
+        //     "hi": "Hi! 👋 Ready to ask a question? StoryBot loves to tell stories!",
+        //     "gravity": "Once upon a time, a young boy named Rohan loved to play with a bright red ball. He would throw it high into the air, and it would always come back down. His sister, Priya, asked, 'Why does the ball always fall back to us?' Rohan's grandmother, a wise woman named Amma, smiled. 'Everything on Earth has a special bond with the ground,' she explained. 'It's like an invisible rope that pulls things down. The bigger the thing, the stronger the rope. This is called gravity.' Rohan and Priya understood then that gravity was the reason they could walk and play without floating away, and it was the Earth's special way of holding everything close.",
+        //     "photosynthesis": "Once, a little sunflower named Surya was feeling hungry. He was sad because he couldn't go find food like his friend, the rabbit. His mother, a big, bright sunflower, told him, 'You don't need to go anywhere, my dear. You have a special gift!' She showed him how to open his leaves to the sunlight, drink water from his roots, and breathe in the air. Slowly, using the sun's golden light, he made his own sweet food inside his body. This magic is called photosynthesis, the way plants make their own food to grow tall and strong.",
+        //     "black holes": "The village elders told a frightening story about a star that died. 'It grew very old and tired,' a wise man explained, 'and then collapsed into a tiny point. It became so heavy that nothing, not even the fastest light, could escape its pull. It is like a cosmic drain in the sky that swallows everything. We call that bottomless pit a black hole,'' he said, 'a place where the rules of the universe do not seem to apply.'",
+        //     "electricity": "One evening, a boy named Arjun was scared of a lightning storm. His father, an electrician, held his hand and said, 'Do not be afraid, son. It is just a big show of powerful energy!'He explained that tiny, fast-moving particles, like playful children, love to run from one place to another. When they all rush together, they create a strong flow of energy. 'Just like the water in a river, this flow is called electricity,' his father explained. ' It is the same energy that lights up our home and makes our fan spin, and the lightning is just a much bigger, wilder version of it!'",
+        //     "the water cycle": "In a small village, a little girl named Anjali wondered where the rain came from. Her grandfather, a farmer, told her a story. 'The water from our river and the big ocean goes up to the sky, like a gentle dance, turning into tiny spirits of mist,' he said. 'When many of these spirits gather and hold hands, they become a big, fluffy cloud. And when the cloud is too full of spirits, it cries happy tears, which we call rain. This journey of water is called the water cycle, and it is what keeps our land green.' ",
+        //     "fractions": "A young boy named Kabir had one large, delicious mango. His two friends, Ankit and Preeti, wanted to share it. Kabir's grandmother, a clever woman, took a knife and divided the mango into three equal pieces. 'Now, each of you has a fraction, or one part, of the whole mango,'' she said. This taught them that a fraction is a fair way to share something whole into smaller parts. ",
+        //     "symmetry": "Riya was drawing a beautiful butterfly. She drew one side and then wondered how to make the other side look exactly the same. Her teacher, Mrs. Sharma, showed her how to fold the paper down the middle. 'If you draw the same shapes and colors on the other side, it will be a perfect mirror image,' she said. 'This perfect balance is called symmetry, a secret of nature's beauty.' ",
+        //     "addition": " One day, Rohan had three shiny marbles. His friend, Dev, gave him two more. Rohan counted all the marbles he now had. 'Wow, I have five marbles now!'' he shouted. His father explained, 'What you just did, Rohan, is called addition. It’s the simple magic of putting things together and finding out how many you have in total.'",
+        //     "geometry": "A wise old carpenter, Dada, was showing his granddaughter, Maya, how to build a table. He used a ruler to make a long line, creating a line segment. Then he used another line to form a perfect right-angle corner. He then used four corners to make a strong rectangle. 'Every shape in the world is made up of simple lines and angles,' he told her. 'This magic of shapes is called geometry, the rulebook for all building and design.' ",
+        //     "democracy": "The children in the village of Shanti-Nagar wanted to choose a new game for the evening. The elders suggested a special method. Each child was given a small pebble to drop in a box next to their favorite game's name. The game with the most pebbles was chosen. 'This way of letting everyone have a say in a decision is called democracy,' the head of the village explained. 'It’s how we make sure every voice is heard.' ",
+        //     "community": "In a small town, there was a big storm. The river overflowed, and many people's homes were damaged. Instead of just helping their own families, everyone in the town helped their neighbors rebuild. They cooked food for each other and shared their tools. They worked together, not as separate families, but as one big family. This powerful feeling of working together is what makes a strong community. ",
+        //     "civil Rights": "In the kingdom of Chandanpur, there was a rule that only people with a special key could drink water from the main well. A brave girl named Lila stood up and said, 'Every person, no matter who they are, deserves water!'' She convinced the king that all people have the same basic needs and rights. The king changed the rule, teaching everyone that civil rights are the equal and fair rules that apply to every person, everywhere. ",
+        //     "geography": "A grandfather told his grandson, Aryan, about the giant mountains and long rivers near their home. 'Long, long ago, the Earth was pushing up, creating huge wrinkles on its skin, like a giant's back. These wrinkles became the great Himalayan mountains,'' he said. 'The rain and melting snow from these mountains then carved deep lines in the land as they flowed to the sea, creating the holy Ganges River. It's the Earth's way of shaping the land. ",
+        //     "variables": "In a world of magical code, a little wizard named Anil needed to store a number. He created a small magic box and gave it the name 'Score.'' He put the number 10 inside and said, 'Now, Score is equal to 10!' Later, he put the number 20 inside, and the box forgot the old number. This magic box, which can hold and change information, is called a variable in programming.",
+        //     "if-else statement": "A tiny robot named Golu was given a job. His master gave him a rule: 'IF the box is red, you must paint it blue. ELSE (if it's any other color), you must paint it green.' Golu would look at each box and make a decision based on this single rule. This way of making choices in code is known as an if-else statement, and it's how programs make decisions. ",
+        //     "loops": " A programmer named Sunita wanted her character to take 100 steps forward. Writing the same command 100 times would take too long. So, she wrote a single command: 'REPEAT 'move one step forward' 100 times.' Her character started walking, taking one step after another, without Sunita having to give a new command each time. This clever command, which repeats a task, is called a loop.",
+        //     "algorithms": "A chef named Rahul wanted to teach a new cook how to make his special sweet rice. He wrote down every single step carefully, from washing the rice to adding the sugar at the end. He told the new cook, 'Follow these steps exactly, and you will make the perfect rice every time!' This set of specific instructions, which solves a problem or completes a task, is called an algorithm in programming. ",
+        //     "nouns": "In the magical village of Vachanpur, lived many things with names. A little girl named Rani called her home a house, her friend's pet a dog, and a shining object in the sky a star. All these 'naming words' were the most important because they gave everything a name. The wise grammarian of the village called these special words nouns, the builders of all sentences. ",
+        //     "verbs": " A young boy named Karan watched his sister run, his father read, and the birds fly. He noticed that all these actions were like little bursts of energy. 'The words that describe actions are called verbs,' his teacher said. 'They are the most powerful words because they make things happen in a sentence, giving it life and movement.'",
+        //     "the Dhol": "In a happy village in Punjab, the people had a special drum called a dhol. Whenever they wanted to celebrate, a big, strong man would hit the dhol with a stick, and a deep, thundering sound would come out. This rhythm was so powerful, it made everyone's feet start tapping and their hearts feel full of joy. The dhol's magic was what made the folk dance of Bhangra so full of life and energy.",
+        //     "lohri": "When the cold winter ended, a family gathered around a big bonfire. They sang songs and threw popcorn and sweets into the fire. A little boy named Aman asked his father why they did this. His father said, 'The fire of Lohri is to thank the sun for a good harvest and to celebrate a new season of hope and warmth. It's a festival that brings everyone together.'",
+        //     "gidda": "In the courtyard of a home, a group of women stood in a circle. They clapped their hands and sang songs together. Their movements were graceful, and their energy was light and happy. A little girl named Komal watched them dance. Her mother told her, 'This beautiful dance of happy women is called Gidda. It's a joyful folk dance that celebrates the spirit of Punjabi women.' ",
+        //     "the Continents": "A teacher told her class a story about the world. 'Once, all the lands were together in one big piece,' she said. 'But over millions of years, they broke apart and became seven big islands that we live on today. These seven giant landmasses are called the continents.' She showed them on a map how each one was like a big country of countries.",
+        //     "the Seasons": "A wise old man explained the seasons to a little girl named Tara. 'Our Earth is like a dancer, slowly twirling around the Sun, he said. 'When we are closer to the sun, we feel its warmth, and it is summer. When our side of the Earth tilts away from the sun, we get less heat, and it is winter. This slow dance is what brings us the changing seasons.'",
+        //     "recycling": " In a village full of trash, a smart girl named Sita had an idea. She sorted all the waste into different piles: paper, glass, and plastic. She told her neighbors, 'We can send these materials to a special place where they will be cleaned and turned into new things, like turning old bottles into new ones.' This magic of giving old things a new life is called recycling.",
+        //     "bye": "Goodbye! 👋 Hope to see you again soon for another story adventure!",
+        //     "thank you": "You're welcome! 😊 StoryBot loves helping out. Ask more anytime!"
+        // };
+        
+        function renderChatHistory() {
+            responseArea.innerHTML = '';
+            chatHistory.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = msg.sender === 'user' ? 'user-question' : 
+                    (msg.sender === 'error' ? 'error-message' : 'story-explanation');
+                msgDiv.textContent = msg.content;
+                responseArea.appendChild(msgDiv);
+            });
+        }
+        
+        async function askQuestion() {
+            const question = questionInput.value.trim();
+            if (!question) {
+                alert('Please enter a question!');
+                return;
+            }
+        
+            // Check for hardcoded responses first
+            // const hardcodedResponse = inbuiltResponses[question.toLowerCase()];
+            // if (hardcodedResponse) {
+            //     chatHistory.push({ sender: 'bot', content: hardcodedResponse });
+            //     renderChatHistory();
+            //     questionInput.value = ''; // Clear the input
+            //     return;
+            // }
+        
+            // Get the subject from the URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const subject = urlParams.get('subject');
+        
+            const selectedGenre = genreSelect.value;
+            const selectedAgeGroup = ageSelect.value;
+            const selectedLength = lengthSelect.value;
+            loadingSpinner.style.display = 'block';
+        
+            try {
+                const response = await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        question: question,
+                        genre: selectedGenre,
+                        age_group: selectedAgeGroup,
+                        length: selectedLength,
+                        subject: subject // Pass the subject to the backend
+                    })
+                });
+        
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+        
+                const data = await response.json();
+        
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+        
+                // Add user question to history
+                chatHistory.push({ sender: 'user', content: question });
+                // Add bot response to history
+                chatHistory.push({ sender: 'bot', content: data.response });
+        
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                chatHistory.push({ sender: 'error', content: 'Apologies, StoryBot is currently experiencing issues. Please try again later.' });
+            } finally {
+                loadingSpinner.style.display = 'none';
+                renderChatHistory();
+                questionInput.value = '';
+                responseArea.scrollTop = responseArea.scrollHeight;
+            }
+        }
+        
+        // Submit on Enter key
+        questionInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                askQuestion();
+            }
+        });
+    </script>
+</body>
+</html>

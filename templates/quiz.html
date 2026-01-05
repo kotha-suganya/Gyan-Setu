@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Gyan Setu - Interactive Quizzes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600&family=Nunito:wght@400;700&family=Poppins:wght@700&display=swap" rel="stylesheet" />
+    <style>
+        /* Your original Gyan Setuu CSS variables */
+        :root {
+            --primary: #6C63FF;
+            --secondary: #FF6584;
+            --accent: #57E2A0;
+            --soft: #FFE6E6;
+            --dark: #22223B;
+            --text: #343459;
+            --video-gradient: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            --card-gradient: linear-gradient(120deg, #FCF6FF 60%, #D6FCFF 100%);
+            --shadow: 0 8px 24px rgba(0,0,0,0.08);
+            --blossom-color: #FF69B4;
+            --logoblue: #3B5998;
+            --tagline-green: #2E8B57;
+            /* New quiz-specific variables */
+            --correct: #28a745;
+            --wrong: #dc3545;
+            --quiz-gradient: linear-gradient(45deg, rgba(108, 99, 255, 0.1), rgba(87, 226, 160, 0.1));
+            --quiz-btn-hover: linear-gradient(45deg, rgba(108, 99, 255, 0.2), rgba(87, 226, 160, 0.2));
+            --loading-color: var(--primary);
+        }
+        body {
+            font-family: 'Nunito', 'Quicksand', sans-serif;
+            background: var(--video-gradient);
+            color: var(--text);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--logoblue);
+            letter-spacing: 2px;
+            user-select: none;
+        }
+        .logo .blossom {
+            color: var(--blossom-color);
+        }
+        .tagline {
+            font-size: 1.2rem;
+            color: var(--tagline-green);
+            font-style: italic;
+        }
+        .quiz-container {
+            padding: 20px;
+        }
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .quiz-header h2 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        .quiz-section {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .quiz-section.active {
+            display: flex;
+        }
+        .loading-section {
+            display: none;
+            text-align: center;
+            padding: 50px;
+        }
+        .loader {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid var(--loading-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            margin: auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .question-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            display: none;
+        }
+        .question-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+        .options-grid {
+            display: grid;
+            gap: 10px;
+        }
+        .option-btn {
+            padding: 12px 15px;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            text-align: left;
+            cursor: pointer;
+            background: transparent;
+            font-size: 1rem;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+            position: relative;
+        }
+        .option-btn:hover {
+            background: var(--quiz-btn-hover);
+            border-color: var(--accent);
+        }
+        .option-btn.correct {
+            background: var(--correct);
+            color: white;
+            border-color: var(--correct);
+        }
+        .option-btn.wrong {
+            background: var(--wrong);
+            color: white;
+            border-color: var(--wrong);
+        }
+        .result-section {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        .result-section h3 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        .result-section p {
+            font-size: 1.2rem;
+            color: var(--text);
+        }
+        .result-section .score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin: 20px 0;
+        }
+        .comparison-result {
+            font-size: 1.1rem;
+            margin-top: 20px;
+            font-style: italic;
+        }
+        .btn-restart {
+            background: var(--primary);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border: none;
+            transition: background 0.3s;
+        }
+        .btn-restart:hover {
+            background: var(--secondary);
+        }
+        .selection-section {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+        .selection-section h4 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        .selection-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .selection-btn {
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .selection-btn.active, .selection-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .start-quiz-btn {
+            background: var(--accent);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        .start-quiz-btn:hover {
+            background: #46b880;
+        }
+        footer {
+            text-align: center;
+            color: #8b85bb;
+            margin-top: 50px;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 768px) {
+            .quiz-navigation {
+                flex-direction: column;
+            }
+        }
+        .back-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    font-size: 1.18rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+.back-btn:hover {
+    background: var(--secondary);
+}
+    </style>
+</head>
+<body>
+    <!-- <button class="back-btn" onclick="window.location.href='http://127.0.0.1:5000/';" title="Back to subjects">
+    <i class="fas fa-arrow-left"></i>
+</button> -->
+<button class="back-btn" onclick="history.back();" title="Back to subjects">
+    <i class="fas fa-arrow-left"></i>
+</button>
+    <div class="container">
+        <header>
+            <div class="logo"><span class="blossom">🌸</span>Gyan Setu<span class="blossom">🌸</span></div>
+            <div class="tagline">From Villages To World Of Wisdom</div>
+        </header>
+        <div class="quiz-container">
+            <div class="quiz-header">
+                <h2 id="quiz-subject-heading"></h2>
+                <p>Test your knowledge on various subjects!</p>
+            </div>
+            <div id="quiz-sections">
+                <div class="selection-section" id="initial-selection">
+                    <h4>Select a Class</h4>
+                    <div class="selection-buttons" id="class-buttons">
+                        <button class="selection-btn" data-class="1">1st Class</button>
+                        <button class="selection-btn" data-class="2">2nd Class</button>
+                        <button class="selection-btn" data-class="3">3rd Class</button>
+                        <button class="selection-btn" data-class="4">4th Class</button>
+                        <button class="selection-btn" data-class="5">5th Class</button>
+                        <button class="selection-btn" data-class="6">6th Class</button>
+                        <button class="selection-btn" data-class="7">7th Class</button>
+                        <button class="selection-btn" data-class="8">8th Class</button>
+                        <button class="selection-btn" data-class="9">9th Class</button>
+                        <button class="selection-btn" data-class="10">10th Class</button>
+                    </div>
+                    <h4>Select a Difficulty Level</h4>
+                    <div class="selection-buttons" id="difficulty-buttons">
+                        <button class="selection-btn" data-difficulty="easy">Easy</button>
+                        <button class="selection-btn" data-difficulty="medium">Medium</button>
+                        <button class="selection-btn" data-difficulty="hard">Hard</button>
+                    </div>
+                    <button class="start-quiz-btn" id="start-quiz-btn">Start Quiz</button>
+                </div>
+                <div class="loading-section" id="loading-section">
+                    <div class="loader"></div>
+                    <p>Loading questions...</p>
+                </div>
+                <div class="quiz-section" id="quiz-questions">
+                </div>
+            </div>
+            <div class="result-section" id="quiz-result">
+                <h3>Quiz Complete!</h3>
+                <p>Your score is:</p>
+                <div class="score" id="final-score"></div>
+                <p class="comparison-result" id="comparison-message"></p>
+                <button class="btn-restart" id="restart-quiz">Try Again</button>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p>© 2025 Gyan Setuu. All rights reserved.<br/>Grow, solve, &amp; shine every day!</p>
+    </footer>
+    <script>
+        const initialSelection = document.getElementById('initial-selection');
+        const classButtons = document.getElementById('class-buttons');
+        const difficultyButtons = document.getElementById('difficulty-buttons');
+        const startQuizBtn = document.getElementById('start-quiz-btn');
+        const quizQuestionsContainer = document.getElementById('quiz-questions');
+        const quizResultSection = document.getElementById('quiz-result');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const comparisonMessage = document.getElementById('comparison-message');
+        const restartBtn = document.getElementById('restart-quiz');
+        const loadingSection = document.getElementById('loading-section');
+        const quizSubjectHeading = document.getElementById('quiz-subject-heading');
+        let currentSubject = '';
+        let currentClass = null;
+        let currentDifficulty = null;
+        let quizQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        function showSection(sectionId) {
+            document.querySelectorAll('#initial-selection, #loading-section, #quiz-questions, #quiz-result').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(sectionId).style.display = 'block';
+        }
+        async function fetchAndRenderQuiz(subject, studentClass, difficulty) {
+            showSection('loading-section');
+            quizQuestionsContainer.innerHTML = '';
+            try {
+                const response = await fetch(`http://127.0.0.1:5003/api/questions?subject=${subject}&class=${studentClass}&difficulty=${difficulty}`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error);
+                }
+                quizQuestions = await response.json();
+                if (quizQuestions.length > 0) {
+                    renderQuestion(quizQuestions[0]);
+                    showSection('quiz-questions');
+                } else {
+                    quizQuestionsContainer.innerHTML = '<p style="text-align:center;">Sorry, no questions found for this selection. Please try another!</p>';
+                    showSection('quiz-questions');
+                }
+            } catch (error) {
+                console.error("Error fetching questions:", error);
+                quizQuestionsContainer.innerHTML = `<p style="text-align:center; color: var(--wrong);">Failed to load quiz: ${error.message}</p>`;
+                showSection('quiz-questions');
+            }
+        }
+        function renderQuestion(question) {
+            const card = document.createElement('div');
+            card.classList.add('question-card');
+            card.innerHTML = `<h3>${currentQuestionIndex + 1}. ${question.question}</h3><div class="options-grid"></div>`;
+            const optionsGrid = card.querySelector('.options-grid');
+            question.options.forEach(option => {
+                const optionBtn = document.createElement('button');
+                optionBtn.classList.add('option-btn');
+                optionBtn.textContent = option;
+                optionBtn.onclick = () => checkAnswer(option, question.answer, optionBtn, card);
+                optionsGrid.appendChild(optionBtn);
+            });
+            quizQuestionsContainer.appendChild(card);
+            card.style.display = 'block';
+        }
+        function checkAnswer(selected, correct, button, card) {
+            const allButtons = card.querySelectorAll('.option-btn');
+            allButtons.forEach(btn => btn.disabled = true);
+            if (selected === correct) {
+                button.classList.add('correct');
+                score++;
+            } else {
+                button.classList.add('wrong');
+                const correctAnswerButton = Array.from(allButtons).find(btn => btn.textContent === correct);
+                if (correctAnswerButton) {
+                    correctAnswerButton.classList.add('correct');
+                }
+            }
+            currentQuestionIndex++;
+            setTimeout(() => {
+                card.style.display = 'none';
+                if (currentQuestionIndex < quizQuestions.length) {
+                    renderQuestion(quizQuestions[currentQuestionIndex]);
+                } else {
+                    showResults();
+                }
+            }, 1000);
+        }
+        function showResults() {
+            showSection('quiz-result');
+            finalScoreDisplay.textContent = `${score} / ${quizQuestions.length}`;
+            const localStorageKey = `quizScore_${currentSubject}_${currentClass}_${currentDifficulty}`;
+            const previousScore = localStorage.getItem(localStorageKey);
+            let comparisonMessageText = '';
+            if (previousScore) {
+                const prevScore = parseInt(previousScore, 10);
+                if (score > prevScore) {
+                    comparisonMessageText = `Great job! You scored higher than your previous best of ${prevScore} on this quiz.`;
+                } else if (score < prevScore) {
+                    comparisonMessageText = `You can do better! Your previous score was ${prevScore}. Keep practicing!`;
+                } else {
+                    comparisonMessageText = `You matched your previous best score of ${prevScore}.`;
+                }
+            } else {
+                comparisonMessageText = "This is your first time taking this quiz. Let's set a new benchmark!";
+            }
+            comparisonMessage.textContent = comparisonMessageText;
+            localStorage.setItem(localStorageKey, score);
+        }
+        function resetQuiz() {
+            score = 0;
+            currentQuestionIndex = 0;
+            quizQuestionsContainer.innerHTML = '';
+            showSection('initial-selection');
+        }
+        // Event listeners
+        classButtons.addEventListener('click', (e) => {
+            if (e.target.classList.contains('selection-btn')) {
+                document.querySelectorAll('#class-buttons .selection-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                currentClass = e.target.dataset.class;
+            }
+        });
+        difficultyButtons.addEventListener('click', (e) => {
+            if (e.target.classList.contains('selection-btn')) {
+                document.querySelectorAll('#difficulty-buttons .selection-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                currentDifficulty = e.target.dataset.difficulty;
+            }
+        });
+        startQuizBtn.addEventListener('click', () => {
+            if (currentClass && currentDifficulty) {
+                fetchAndRenderQuiz(currentSubject, currentClass, currentDifficulty);
+            } else {
+                alert("Please select a class and difficulty level first!");
+            }
+        });
+        restartBtn.addEventListener('click', resetQuiz);
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentSubject = urlParams.get('subject');
+            if (currentSubject) {
+                quizSubjectHeading.textContent = `${currentSubject.replace(/_/g, ' ').toUpperCase()} Quiz`;
+                showSection('initial-selection');
+            } else {
+                quizSubjectHeading.textContent = "Please return to the home page to select a subject.";
+            }
+        });
+    </script>
+</body>
+</html>

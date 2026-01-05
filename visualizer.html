@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gyan Setu - Visualizer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600&family=Nunito:wght@400;700&family=Poppins:wght@700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --secondary: #FF6584;
+            --accent: #57E2A0;
+            --soft: #FFE6E6;
+            --dark: #22223B;
+            --text: #343459;
+            --video-gradient: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            --card-gradient: linear-gradient(120deg, #FCF6FF 60%, #D6FCFF 100%);
+            --shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+        body {
+            font-family: 'Nunito', 'Quicksand', sans-serif;
+            background: var(--video-gradient);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--card-gradient);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            padding: 40px;
+            position: relative;
+        }
+        h1 {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            background-clip: text;
+            color: transparent;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 18px;
+            font-weight: 800;
+        }
+        .input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .input-area input {
+            flex-grow: 1;
+            padding: 12px 20px;
+            font-size: 1.1em;
+            border: 1px solid #dedff0;
+            border-radius: 25px;
+            background: var(--soft);
+            color: var(--dark);
+            outline: none;
+        }
+        .btn {
+            padding: 12px 25px;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .btn:hover {
+            background: linear-gradient(to left, var(--secondary), var(--primary));
+        }
+        .output-area {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
+            min-height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            overflow: auto; /* Allow scrolling for large diagrams */
+        }
+        .back-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            font-size: 1.18rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        .back-btn:hover {
+            background: var(--secondary);
+        }
+        #mermaid-output {
+            width: 100%;
+        }
+        .info-text {
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- <button class="back-btn" onclick="window.location.href='http://127.0.0.1:5000/?from=visualizer';" title="Back to subjects">
+    <i class="fas fa-arrow-left"></i>
+</button> -->
+
+
+<button class="back-btn" onclick="history.back();" title="Back to subjects">
+    <i class="fas fa-arrow-left"></i>
+</button>
+
+
+
+    <div class="container">
+
+        <h1>Visualizer</h1>
+        <p class="info-text">Enter a topic to generate a subject-specific flowchart or mind map.</p>
+        <div class="input-area">
+            <input type="text" id="topicInput" placeholder="e.g., Photosynthesis" />
+            <button class="btn" onclick="generateMindMap()">Generate Map</button>
+        </div>
+        <div class="output-area" id="output-area">
+            <p id="placeholder-text">Your flowchart will appear here.</p>
+        </div>
+    </div>
+<script>
+    // Initialize Mermaid.js
+    mermaid.initialize({ startOnLoad: false });
+
+    async function generateMindMap() {
+        const topic = document.getElementById('topicInput').value.trim();
+        if (!topic) {
+            alert("Please enter a topic!");
+            return;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const subject = urlParams.get('subject');
+
+        const outputArea = document.getElementById('output-area');
+        const placeholder = document.getElementById('placeholder-text');
+
+        outputArea.innerHTML = '';
+        const newPlaceholder = document.createElement('p');
+        newPlaceholder.id = 'placeholder-text';
+        newPlaceholder.textContent = "Generating your flowchart...";
+        outputArea.appendChild(newPlaceholder);
+
+        try {
+            const response = await fetch('http://127.0.0.1:5002/generate_map', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ topic, subject })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            let mermaidCode = data.mermaid_code;
+
+            // Check for the "not relevant" message from the backend
+            if (mermaidCode.trim() === 'This topic is not relevant to the selected subject.') {
+                outputArea.innerHTML = '';
+                newPlaceholder.textContent = 'Sorry, this topic is not relevant to the selected subject. Please try a different topic.';
+                outputArea.appendChild(newPlaceholder);
+                return;
+            }
+
+            // Clean up the Mermaid code before rendering
+            mermaidCode = mermaidCode.trim();
+            mermaidCode = mermaidCode.replace(/```mermaid\n|```/g, '');
+
+            const { svg } = await mermaid.render('mindmap-id', mermaidCode);
+            outputArea.innerHTML = svg;
+
+        } catch (error) {
+            console.error('Error generating mind map:', error);
+            outputArea.innerHTML = '';
+            const errorPlaceholder = document.createElement('p');
+            errorPlaceholder.id = 'placeholder-text';
+            errorPlaceholder.textContent = 'Sorry, an error occurred. Please try a different topic.';
+            outputArea.appendChild(errorPlaceholder);
+        }
+    }
+</script>
+</body>
+</html>

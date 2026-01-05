@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Gyan Setu - Interactive Support Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600&family=Nunito:wght@400;700&family=Poppins:wght@700&display=swap" rel="stylesheet" />
+    
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --secondary: #FF6584;
+            --accent: #57E2A0;
+            --soft: #FFE6E6;
+            --dark: #22223B;
+            --text: #343459;
+            --video-gradient: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            --card-gradient: linear-gradient(120deg, #FCF6FF 60%, #D6FCFF 100%);
+            --shadow: 0 8px 24px rgba(0,0,0,0.08);
+            --blossom-color: #FF69B4;
+            --logoblue: #3B5998;
+            --tagline-green: #2E8B57;
+        }
+
+        body {
+            background: var(--video-gradient);
+            color: var(--text);
+            font-family: 'Nunito', 'Quicksand', sans-serif;
+            min-height: 100vh;
+            padding: 0 20px;
+        }
+        .container {
+            max-width: 1180px;
+            margin: 30px auto;
+        }
+        header {
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 36px;
+            position: relative;
+        }
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--logoblue);
+            letter-spacing: 2px;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            animation: moveUpDown 3s ease-in-out infinite;
+        }
+        .logo .blossom {
+            font-size: 2.4rem;
+            margin: 0 10px;
+            color: var(--blossom-color);
+            animation: blossomPulse 2.5s infinite ease-in-out;
+            user-select: none;
+        }
+        @keyframes blossomPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        @keyframes moveUpDown {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .tagline {
+            margin-top: 6px;
+            font-size: 1.4rem;
+            color: var(--tagline-green);
+            letter-spacing: 0.8px;
+            font-family: 'Quicksand', sans-serif;
+            font-style: italic;
+            user-select: none;
+        }
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+            margin-top: 40px;
+        }
+        .subject-card {
+            background: var(--card-gradient);
+            border-radius: 18px;
+            padding-bottom: 5px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .subject-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 16px 32px rgba(100,97,255,0.08);
+        }
+        .subject-icon {
+            font-size: 3.7rem;
+            padding: 30px 0 10px;
+            color: var(--primary);
+        }
+        .subject-title {
+            font-size: 1.36rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+        .subject-desc {
+            color: #66697A;
+            font-size: 1.07rem;
+            text-align: center;
+            margin-bottom: 16px;
+            padding: 0 12px;
+        }
+        .btn {
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            color: white;
+            border-radius: 30px;
+            font-weight: bold;
+            padding: 10px 28px;
+            margin-bottom: 17px;
+            cursor: pointer;
+            border: none;
+            font-size: 1.08rem;
+            transition: box-shadow 0.2s, background 0.2s;
+        }
+        .btn:hover {
+            background: linear-gradient(to left, var(--secondary), var(--primary));
+            box-shadow: 0 10px 24px rgba(255,101,132,0.09);
+        }
+        .content-panel {
+            display: none;
+            flex-wrap: wrap;
+            gap: 36px;
+            margin-top: 32px;
+            flex-direction: row;
+        }
+        .chatbot-section, .video-section {
+            background: white;
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            padding: 32px 24px;
+            flex: 1 1 340px;
+            min-width: 340px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .back-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            font-size: 1.18rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .back-btn:hover {
+            background: var(--secondary);
+        }
+        .chat-title {
+            flex: 1;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-left: 12px;
+            text-align: left;
+        }
+        .chat-messages {
+            flex: 1;
+            /* NEW: Add max-height to enable scrolling */
+            max-height: 400px;
+            padding: 10px 2px 10px 0;
+            margin-bottom: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            border: 1px solid var(--primary);
+            border-radius: 10px;
+            background: var(--soft);
+        }
+        .message {
+            padding: 10px 18px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-break: break-word;
+        }
+        .user-message {
+            align-self: flex-end;
+            background: var(--primary);
+            color: white;
+            border-bottom-right-radius: 6px;
+        }
+        .bot-message {
+            align-self: flex-start;
+            background: var(--soft);
+            color: var(--dark);
+            border-bottom-left-radius: 6px;
+        }
+        .chat-input-panel {
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #f4f4fa;
+            padding-top: 12px;
+            margin-top: 8px;
+        }
+        .chat-input {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .chat-input input[type="text"] {
+            flex: 1;
+            padding: 10px 15px;
+            border-radius: 23px;
+            border: 1px solid #dedff0;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .chat-input input:focus {
+            border-color: var(--primary);
+        }
+        .input-btn, .voice-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            cursor: pointer;
+            font-size: 1.07rem;
+            margin-left: 5px;
+        }
+        .input-btn:hover, .voice-btn:hover {
+            background: var(--secondary);
+        }
+        .upload-btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            cursor: pointer;
+            font-size: 1.12rem;
+        }
+        .upload-btn:hover {
+            background: var(--secondary);
+        }
+        .file-input {
+            display: none;
+        }
+        .video-section {
+            position: relative;
+            min-height: 340px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .video-display {
+            width: 100%;
+            height: 200px;
+            border-radius: 12px;
+            background: var(--video-gradient);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transform: translateY(-30px);
+        }
+        iframe, video {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+        }
+        .video-link-panel {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .video-link-input {
+            flex: 1;
+            padding: 7px 14px;
+            border-radius: 18px;
+            border: 1px solid #dedff0;
+            font-size: 0.98rem;
+            font-family: inherit;
+        }
+        .add-video-btn:hover {
+            background: var(--accent);
+        }
+        footer {
+            text-align: center;
+            color: #8b85bb;
+            margin: 55px auto 0;
+            font-size: 1.1rem;
+            padding-bottom: 26px;
+        }
+        .video-controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding-top: 15px;
+        }
+        @media (max-width: 900px) {
+            .content-panel {
+                flex-direction: column;
+            }
+            .video-section, .chatbot-section  {
+                min-width: 100%;
+            }
+        }
+        .emotion-btn-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .emotion-btn {
+            background: linear-gradient(to right, var(--secondary), var(--accent));
+            color: white;
+            border-radius: 30px;
+            font-weight: bold;
+            padding: 10px 30px;
+            margin-top: 0;
+            margin-bottom: 5px;
+            cursor: pointer;
+            border: none;
+            font-size: 1.15rem;
+            transition: box-shadow 0.2s, background 0.2s;
+            box-shadow: var(--shadow);
+        }
+        .emotion-btn:hover {
+            background: linear-gradient(to left, var(--primary), var(--secondary));
+        }
+        #emotion-result {
+            font-family: 'Nunito', 'Quicksand', sans-serif;
+            min-height: 30px;
+        }
+         body {
+      font-family: 'Nunito', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+
+    .profile-header {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      user-select: none;
+    }
+
+    .profile-toggle {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: var(--text); /* Using deep indigo here */
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: opacity 0.3s ease;
+    }
+
+    .profile-toggle:hover {
+      opacity: 0.85;
+    }
+
+    .profile-dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      margin-top: 12px;
+      padding: 15px 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      width: 220px;
+      text-align: left;
+      background: #fff;
+    }
+
+    .profile-dropdown p {
+      margin: 6px 0;
+      font-size: 16px;
+    }
+
+    .profile-dropdown strong {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .btn-logout {
+      width: 100%;
+      background: #5062ec;
+      border: none;
+      color: white;
+      padding: 8px 0;
+      border-radius: 25px;
+      font-weight: 600;
+      margin-top: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-logout:hover {
+      background: #FF6584; 
+    }
+  
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+  <!-- Profile Icon and Dropdown -->
+  <div class="profile-header" tabindex="0" aria-label="User profile menu">
+    <div class="profile-toggle" id="profileToggle" title="User Profile">U</div>
+    <div class="profile-dropdown" id="profileDropdown" role="menu" aria-hidden="true">
+      <p><strong id="ddFullname">Full Name</strong></p>
+      <p>Username: <span id="ddUsername">username</span></p>
+      <p>🔥 Streak: <span id="ddStreak">0</span></p>
+      <button class="btn-logout" id="logoutBtn" type="button">Logout</button>
+    </div>
+  </div>
+        <header>
+            <div class="logo"><span class="blossom">🌸</span>Gyan Setu<span class="blossom">🌸</span></div>
+            <div class="tagline">From Villages To World Of Wisdom</div>
+        </header>
+
+        <div id="announcement-container" style="display: none; margin-bottom: 25px;">
+    <div style="background: var(--soft); border-left: 5px solid var(--secondary); padding: 15px 20px; border-radius: 12px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 15px;">
+        <i class="fas fa-bullhorn" style="font-size: 1.5rem; color: var(--secondary); animation: blossomPulse 2s infinite;"></i>
+        <div>
+            <strong style="color: var(--secondary); display: block; font-family: 'Quicksand';">Message from Teacher:</strong>
+            <p id="announcement-text" style="margin: 5px 0 0; font-weight: 600; color: var(--text);"></p>
+        </div>
+    </div>
+</div>
+        <div class="emotion-btn-wrapper" style="display: none;">
+            <button id="detect-emotion-btn" class="btn emotion-btn">
+                <i class="fas fa-heartbeat"></i> Detect My Emotion
+            </button>
+            <span id="emotion-result" style="display:block;margin-top:12px; font-size:1.18rem;color:var(--secondary);"></span>
+        </div>
+        <div id="subjects-view">
+            <h2 style="text-align:center; margin-bottom:10px;color:var(--dark);font-size:1.20rem;">Select Your Learning Domain</h2>
+            <div class="subjects-grid">
+                <div class="subject-card" data-domain="math">
+                    <div class="subject-icon">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <div class="subject-title">Mathematics</div>
+                    <div class="subject-desc">Learn algebra, geometry and more, with math tutor.</div>
+                    <button class="btn start-chat">Explore</button>
+                </div>
+                <div class="subject-card" data-domain="science">
+                    <div class="subject-icon"><i class="fas fa-flask"></i></div>
+                    <div class="subject-title">Science</div>
+                    <div class="subject-desc">Dive into biology, chemistry, physics and scientific discovery.</div>
+                    <button class="btn start-chat">Explore</button>
+                </div>
+                <div class="subject-card" data-domain="social">
+                    <div class="subject-icon"><i class="fas fa-globe-asia"></i></div>
+                    <div class="subject-title">Social Studies</div>
+                    <div class="subject-desc">Study history, civics, geography and society around the globe.</div>
+                    <button class="btn start-chat">Explore</button>
+                </div>
+                <div class="subject-card" data-domain="english">
+                    <div class="subject-icon"><i class="fas fa-spell-check"></i></div>
+                    <div class="subject-title">English</div>
+                    <div class="subject-desc">Improve grammar, vocabulary, and communication in English.</div>
+                    <button class="btn start-chat">Explore</button>
+                </div>
+                <div class="subject-card" data-domain="punjabi">
+                    <div class="subject-icon"><i class="fas fa-language"></i></div>
+                    <div class="subject-title">Punjabi</div>
+                    <div class="subject-desc">Learn Punjabi language, literature, and culture.</div>
+                    <button class="btn start-chat">Explore</button>
+                </div>
+                <div class="subject-card" data-domain="hindi">
+                    <div class="subject-icon"><i class="fas fa-book-open"></i></div>
+                    <div class="subject-title">Hindi</div>
+                    <div class="subject-desc">Practice Hindi grammar, reading, and conversation.</div>
+                    <button class="btn start-chat">Explore</button>
+                </div>
+                <div class="subject-card" data-domain="gk">
+                    <div class="subject-icon"><i class="fas fa-lightbulb"></i></div>
+                    <div class="subject-title">General Knowledge</div>
+                    <div class="subject-desc">Expand your knowledge across multiple subjects and current affairs.</div>
+                    <button class="btn start-chat">Explore</button>
+                </div>
+                <div class="subject-card" data-domain="programming">
+                    <div class="subject-icon"><i class="fas fa-code"></i></div>
+                    <div class="subject-title">Programming</div>
+                    <div class="subject-desc">Code in Python, JavaScript, Java and much more.</div>
+                    <button class="btn start-chat">Explore</button>
+                </div>
+            </div>
+        </div>
+        <div id="content-panel" class="content-panel">
+            <div class="chatbot-section">
+                <div class="chat-header">
+                    <button class="back-btn" id="back-to-subjects" title="Back to subjects"><i class="fas fa-arrow-left"></i></button>
+                    <div class="chat-title" id="chat-domain-title"></div>
+                </div>
+                <div class="chat-messages" id="chat-messages"></div>
+                <div class="chat-input-panel">
+                    <div class="chat-input">
+                        <input type="text" id="message-input" placeholder="Ask your question..."/>
+                        <button class="voice-btn" id="voice-btn" title="Speak"><i class="fas fa-microphone"></i></button>
+                    </div>
+                    <button class="input-btn" id="send-message" title="Send"><i class="fas fa-paper-plane"></i></button>
+<!-- <input type="file" id="file-input" class="file-input" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.ppt,.pptx,.txt" multiple/>       
+             <button class="upload-btn" id="upload-btn" title="Upload File"><i class="fas fa-upload"></i></button> -->
+                </div>
+            </div>
+            <div class="video-section">
+                <div style="position: relative;">
+                    <video id="webcam-video" autoplay muted style="width: 100%; height: auto; border-radius: 12px; transform: rotateY(180deg); box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></video>
+                    <canvas id="face-detection-canvas" style="position: absolute; top: 0; left: 0;"></canvas>
+                </div>
+                <div class="video-display" id="video-display" style="height: 200px;">
+                    <div id="youtube-player"></div>
+                </div>
+                <div class="video-controls">
+    <button class="btn" onclick="window.location.href='http://127.0.0.1:5001/?subject=' + localStorage.getItem('selectedSubject');">StoryBot</button>
+<button class="btn" onclick="window.location.href='http://127.0.0.1:5002/?subject=' + localStorage.getItem('selectedSubject');">Visualizer</button>
+<button class="btn" onclick="window.location.href='http://127.0.0.1:5003/?subject=' + localStorage.getItem('selectedSubject');">
+    Questionnaire
+</button>
+</div>
+            </div>
+        </div>
+        <footer>
+            <p>© 2025 GyanSetu. All rights reserved.<br/>Grow, solve, &amp; shine every day!</p>
+        </footer>
+    </div>
+    <script>
+    // Global variables
+    //let uploadedFile = null;
+    let player;
+
+    // Get references to your buttons and input fields
+    const subjectsView = document.getElementById('subjects-view');
+    const contentPanel = document.getElementById('content-panel');
+    const chatDomainTitle = document.getElementById('chat-domain-title');
+    const chatMessages = document.getElementById('chat-messages');
+    const messageInput = document.getElementById('message-input');
+    const sendMessageBtn = document.getElementById('send-message');
+    const backBtn = document.getElementById('back-to-subjects');
+    const videoDisplay = document.getElementById('video-display');
+    const webcamVideo = document.getElementById('webcam-video');
+    const faceDetectionCanvas = document.getElementById('face-detection-canvas');
+    const emotionBtn = document.getElementById('detect-emotion-btn');
+    const emotionResultSpan = document.getElementById('emotion-result');
+    // const uploadBtn = document.getElementById('upload-btn');
+    // const fileInput = document.getElementById('file-input');
+
+    const subjectDomains = {
+        math: 'Mathematics',
+        science: 'Science',
+        social: 'Social Studies',
+        english: 'English',
+        punjabi: 'Punjabi',
+        hindi: 'Hindi',
+        gk: 'General Knowledge',
+        programming: 'Programming'
+    };
+    const welcomeMessages = {
+        math: "Hello! I'm your Mathematics assistant. Ask me anything!",
+        science: "Hello! I'm your Science assistant. Let's explore!",
+        social: "Hello! I'm your Social Studies assistant. What do you want to learn?",
+        english: "Hello! I'm your English assistant. How can I help?",
+        punjabi: "Hello! I'm your Punjabi assistant. How can I help?",
+        hindi: "Hello! I'm your Hindi assistant. How can I help?",
+        gk: "Hello! I'm your General Knowledge assistant. How can I help?",
+        programming: "Hello! I'm your Programming assistant. How can I help?"
+    };
+
+    function onYouTubeIframeAPIReady() {}
+
+    function createYouTubePlayer(videoId) {
+        if (player) {
+            player.destroy();
+        }
+        player = new YT.Player('youtube-player', {
+            height: '100%',
+            width: '100%',
+            videoId: videoId,
+            playerVars: {
+                'autoplay': 1,
+                'controls': 1,
+                'rel': 0,
+                'mute': 1
+            }
+        });
+    }
+
+    async function startEmotionDetection() {
+        try {
+            await faceapi.nets.tinyFaceDetector.loadFromUri('models');
+            await faceapi.nets.faceExpressionNet.loadFromUri('models');
+            console.log('Face-API models loaded successfully.');
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            webcamVideo.srcObject = stream;
+            webcamVideo.addEventListener('play', () => {
+                faceDetectionCanvas.style.display = 'block';
+                const displaySize = { width: webcamVideo.offsetWidth, height: webcamVideo.offsetHeight };
+                faceapi.matchDimensions(faceDetectionCanvas, displaySize);
+                // Inside startEmotionDetection() -> setInterval
+setInterval(async () => {
+    const detections = await faceapi.detectSingleFace(webcamVideo, new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
+    
+    // Pass the detections to our new handler
+    if (detections) {
+        const expressions = detections.expressions;
+        const dominantEmotion = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
+        emotionResultSpan.textContent = `Detected Emotion: ${dominantEmotion}`;
+        
+        // NEW: Handle speed and pause
+        handleUserPresence(detections, dominantEmotion); 
+        
+        const resizedDetections = faceapi.resizeResults(detections, displaySize);
+        faceDetectionCanvas.getContext('2d').clearRect(0, 0, faceDetectionCanvas.width, faceDetectionCanvas.height);
+        faceapi.draw.drawDetections(faceDetectionCanvas, resizedDetections);
+    } else {
+        // NEW: Handle cases where the eyes are closed or head is down (no face detected)
+        handleUserPresence(null, null);
+    }
+}, 500);
+            });
+        } catch (err) {
+            console.error('Error starting emotion detection:', err);
+            emotionResultSpan.textContent = 'Failed to start webcam for emotion detection.';
+        }
+    }
+
+    function adjustVideoSpeed(emotion) {
+        if (!player || !player.getPlaybackRate) return;
+        let speed = 1.0;
+        switch (emotion) {
+            case 'sad':
+            case 'disgusted':
+            case 'fearful':
+            case 'angry':
+                speed = 0.75;
+                break;
+            case 'happy':
+            case 'surprised':
+                speed = 1.25;
+                break;
+            default:
+                speed = 1.0;
+                break;
+        }
+        if (player.getPlaybackRate() !== speed) {
+            player.setPlaybackRate(speed);
+        }
+    }
+
+    function addMessage(text, sender = 'bot') {
+        const msg = document.createElement('div');
+        msg.className = `message ${sender}-message`;
+        msg.textContent = text;
+        chatMessages.appendChild(msg);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // --- CONSOLIDATED EVENT LISTENERS ---
+
+    // Subject cards click event
+    document.querySelectorAll('.start-chat').forEach(button => {
+        button.addEventListener('click', function() {
+            const card = this.closest('.subject-card');
+            const domain = card.dataset.domain;
+            localStorage.setItem('selectedSubject', domain);
+            chatDomainTitle.textContent = subjectDomains[domain];
+            subjectsView.style.display = 'none';
+            contentPanel.style.display = 'flex';
+            chatMessages.innerHTML = '';
+            addMessage(welcomeMessages[domain], 'bot');
+            document.querySelector('.emotion-btn-wrapper').style.display = 'flex';
+            webcamVideo.style.display = 'block';
+            createYouTubePlayer('clKnM3zKt0Q');
+        });
+    });
+
+    // Back button event
+    backBtn.addEventListener('click', () => {
+        contentPanel.style.display = 'none';
+        subjectsView.style.display = 'block';
+        if (player) {
+            player.destroy();
+        }
+        if (webcamVideo.srcObject) {
+            webcamVideo.srcObject.getTracks().forEach(track => track.stop());
+        }
+        document.querySelector('.emotion-btn-wrapper').style.display = 'none';
+        webcamVideo.style.display = 'none';
+        faceDetectionCanvas.style.display = 'none';
+        chatMessages.innerHTML = '';
+    });
+    
+    // Upload button event
+    // uploadBtn.addEventListener('click', () => {
+    //     fileInput.click();
+    // });
+
+    // File input change event
+    // fileInput.addEventListener('change', (e) => {
+    //     const files = e.target.files;
+    //     if (files.length > 0) {
+    //         uploadedFile = files[0];
+    //         addMessage(`File ready to send: ${uploadedFile.name}`, 'user');
+    //         messageInput.value = `File: ${uploadedFile.name}`;
+    //     }
+    // });
+
+    // Consolidated send message/upload event
+    // sendMessageBtn.addEventListener('click', async () => {
+    //     if (uploadedFile) {
+    //         // Handle file upload
+    //         const formData = new FormData();
+    //         formData.append('file', uploadedFile);
+    //         formData.append('subject', localStorage.getItem('selectedSubject'));
+
+    //         try {
+    //             const response = await fetch('http://127.0.0.1:5000/upload', {
+    //                 method: 'POST',
+    //                 body: formData
+    //             });
+    //             const result = await response.json();
+    //             addMessage(`Upload successful! Server said: "${result.message}"`, 'bot');
+    //         } catch (error) {
+    //             console.error('Error uploading file:', error);
+    //             addMessage('File upload failed. Please try again.', 'bot');
+    //         } finally {
+    //             uploadedFile = null;
+    //             messageInput.value = '';
+    //         }
+    //     } else {
+    //         // Existing logic for handling a text message
+    //         const userText = messageInput.value.trim();
+    //         if (!userText) return;
+    //         addMessage(userText, 'user');
+    //         messageInput.value = '';
+    //         const userTextLower = userText.toLowerCase();
+    //         const currentDomain = localStorage.getItem('selectedSubject');
+
+    //         try {
+    //             // Your chat API call
+    //             const chatResponse = await fetch('http://127.0.0.1:5000/chat', {
+    //                 method: 'POST',
+    //                 headers: { 'Content-Type': 'application/json' },
+    //                 body: JSON.stringify({ prompt: userTextLower, subject: currentDomain })
+    //             });
+    //             const chatData = await chatResponse.json();
+    //             addMessage(chatData.response, 'bot');
+    //         } catch (error) {
+    //             console.error('Error fetching chat response:', error);
+    //             addMessage("I'm sorry, I couldn't connect to the chat service.", 'bot');
+    //         }
+
+    //         try {
+    //             // Your visuals API call
+    //             const videoResponse = await fetch('http://127.0.0.1:5000/visuals', {
+    //                 method: 'POST',
+    //                 headers: { 'Content-Type': 'application/json' },
+    //                 body: JSON.stringify({ query: userTextLower, subject: currentDomain })
+    //             });
+    //             const videoData = await videoResponse.json();
+    //             if (player) {
+    //                 player.loadVideoById(videoData.video_id);
+    //             }
+    //             console.log("Visual URL received:", videoData.visual_url);
+    //         } catch (error) {
+    //             console.error('Error fetching visual data:', error);
+    //             if (player) {
+    //                 player.loadVideoById('dQw4w9WgXcQ');
+    //             }
+    //         }
+    //     }
+    // });
+
+    sendMessageBtn.addEventListener('click', async () => {
+    // Existing logic for handling a text message
+    const userText = messageInput.value.trim();
+    if (!userText) return;
+    addMessage(userText, 'user');
+    messageInput.value = '';
+    const userTextLower = userText.toLowerCase();
+    const currentDomain = localStorage.getItem('selectedSubject');
+
+    try {
+        const chatResponse = await fetch('http://127.0.0.1:5000/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: userTextLower, subject: currentDomain })
+        });
+        const chatData = await chatResponse.json();
+        addMessage(chatData.response, 'bot');
+    } catch (error) {
+        console.error('Error fetching chat response:', error);
+        addMessage("I'm sorry, I couldn't connect to the chat service.", 'bot');
+    }
+
+    try {
+        const videoResponse = await fetch('http://127.0.0.1:5000/visuals', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: userTextLower, subject: currentDomain })
+        });
+        const videoData = await videoResponse.json();
+        if (player) {
+            player.loadVideoById(videoData.video_id);
+        }
+        console.log("Visual URL received:", videoData.visual_url);
+    } catch (error) {
+        console.error('Error fetching visual data:', error);
+        if (player) {
+            player.loadVideoById('dQw4w9WgXcQ');
+        }
+    }
+});
+    
+    // Keypress event for the input field
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessageBtn.click();
+    });
+
+    // Voice button event
+    const voiceBtn = document.getElementById('voice-btn');
+    voiceBtn.addEventListener('click', () => {
+        if (!('webkitSpeechRecognition' in window)) {
+            alert('Voice input not supported in your browser!');
+            return;
+        }
+        voiceBtn.disabled = true;
+        voiceBtn.style.background = '#ddd';
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 2;
+        recognition.onresult = (event) => {
+            messageInput.value = event.results[0][0].transcript;
+            voiceBtn.disabled = false;
+            voiceBtn.style.background = '';
+        };
+        recognition.onerror = () => {
+            voiceBtn.disabled = false;
+            voiceBtn.style.background = '';
+        };
+        recognition.onend = () => {
+            voiceBtn.disabled = false;
+            voiceBtn.style.background = '';
+        };
+        recognition.start();
+    });
+
+    // Emotion detection button event
+    emotionBtn.addEventListener('click', function() {
+        this.disabled = true;
+        this.textContent = 'Detecting...';
+        startEmotionDetection().then(() => {
+            this.textContent = 'Detection Active';
+        }).catch(err => {
+            console.error('Error in emotion detection setup:', err);
+            this.textContent = 'Error detecting emotions.';
+            this.disabled = false;
+        });
+    });
+
+    // Load user data from localStorage
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    console.log('Loaded currentUser from localStorage:', currentUser);
+
+    const profileToggle = document.getElementById('profileToggle');
+    const profileDropdown = document.getElementById('profileDropdown');
+    const ddFullname = document.getElementById('ddFullname');
+    const ddUsername = document.getElementById('ddUsername');
+    const ddStreak = document.getElementById('ddStreak');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (!currentUser || !currentUser.username) {
+      alert('No user is currently signed in.');
+      window.location.href = 'signin.html';
+    } else {
+      let fullname = currentUser.fullname || currentUser.fullName || currentUser.name || 'No Name';
+      let firstInitial = fullname.charAt(0).toUpperCase();
+
+      profileToggle.textContent = firstInitial;
+      ddFullname.textContent = fullname;
+      ddUsername.textContent = currentUser.username;
+      ddStreak.textContent = currentUser.streak || 0;
+    }
+
+    profileToggle.addEventListener('click', () => {
+      const isOpen = profileDropdown.style.display === 'block';
+      profileDropdown.style.display = isOpen ? 'none' : 'block';
+      profileDropdown.setAttribute('aria-hidden', isOpen ? 'true' : 'false');
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('rememberMe');
+      alert('You have been logged out.');
+      window.location.href = 'signin.html';
+    });
+
+    window.addEventListener('click', (event) => {
+      if (!profileDropdown.contains(event.target) && !profileToggle.contains(event.target)) {
+        profileDropdown.style.display = 'none';
+        profileDropdown.setAttribute('aria-hidden', 'true');
+      }
+    });
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === "Escape") {
+        profileDropdown.style.display = 'none';
+        profileDropdown.setAttribute('aria-hidden', 'true');
+      }
+    });
+
+
+    // Add a variable at the top of your script to track "sleep" duration
+// 1. Add these variables at the top of your script tag
+let sleepCounter = 0;
+const SLEEP_THRESHOLD = 6; // 6 iterations * 500ms = 3 seconds
+
+function handleStudentStatus(detections, dominantEmotion) {
+    if (!player || !player.pauseVideo || !player.playVideo) return;
+
+    if (!detections) {
+        // Increment counter if face is not detected (eyes closed/head down)
+        sleepCounter++;
+        if (sleepCounter >= SLEEP_THRESHOLD) {
+            player.pauseVideo();
+            emotionResultSpan.textContent = "Status: Sleeping detected - Video Paused";
+            emotionResultSpan.style.color = "red";
+        }
+    } else {
+        // Face detected: Reset counter and resume if it was paused
+        if (sleepCounter >= SLEEP_THRESHOLD) {
+            player.playVideo();
+        }
+        sleepCounter = 0;
+        emotionResultSpan.style.color = "var(--secondary)";
+        
+        // Adjust speed based on emotion as before
+        adjustVideoSpeed(dominantEmotion);
+    }
+}
+
+// 2. Update your startEmotionDetection setInterval loop
+setInterval(async () => {
+    const detections = await faceapi.detectSingleFace(
+        webcamVideo, 
+        new faceapi.TinyFaceDetectorOptions()
+    ).withFaceExpressions();
+
+    if (detections) {
+        const expressions = detections.expressions;
+        const dominantEmotion = Object.keys(expressions).reduce((a, b) => 
+            expressions[a] > expressions[b] ? a : b
+        );
+        emotionResultSpan.textContent = `Detected Emotion: ${dominantEmotion}`;
+        
+        // Draw on canvas
+        const displaySize = { width: webcamVideo.offsetWidth, height: webcamVideo.offsetHeight };
+        const resizedDetections = faceapi.resizeResults(detections, displaySize);
+        faceDetectionCanvas.getContext('2d').clearRect(0, 0, faceDetectionCanvas.width, faceDetectionCanvas.height);
+        faceapi.draw.drawDetections(faceDetectionCanvas, resizedDetections);
+        
+        // Run the sleep/speed logic
+        handleStudentStatus(detections, dominantEmotion);
+    } else {
+        // No face detected (eyes closed/sleeping)
+        handleStudentStatus(null, null);
+    }
+}, 500);
+
+
+function loadAnnouncement() {
+    const announcement = localStorage.getItem('gyansetu_announcement');
+    const container = document.getElementById('announcement-container');
+    const textField = document.getElementById('announcement-text');
+
+    if (announcement && announcement.trim() !== "") {
+        textField.textContent = announcement;
+        container.style.display = 'block';
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+// Update your existing window.onload or add this:
+window.addEventListener('load', loadAnnouncement);
+
+// Optional: Listen for storage changes in case the teacher updates it while student is on page
+window.addEventListener('storage', (e) => {
+    if (e.key === 'gyansetu_announcement') {
+        loadAnnouncement();
+    }
+});
+</script>
+</body>
+</html>

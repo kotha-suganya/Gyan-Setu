@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>GyanSetu - Teacher Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600&family=Nunito:wght@400;700&family=Poppins:wght@700&display=swap" rel="stylesheet" />
+    
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --secondary: #FF6584;
+            --accent: #57E2A0;
+            --dark: #22223B;
+            --text: #343459;
+            --bg-light: #F8F9FE;
+            --blossom-color: #FF69B4;
+            --shadow: 0 8px 24px rgba(0,0,0,0.08);
+            --soft: #FFF0F3;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Nunito', sans-serif;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 260px;
+            background: white;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+            position: fixed;
+            height: 100vh;
+            z-index: 10;
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #3B5998;
+            margin-bottom: 40px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .logo span { color: var(--blossom-color); margin: 0 5px; }
+
+        .nav-item {
+            padding: 15px;
+            margin: 8px 0;
+            border-radius: 12px;
+            color: var(--text);
+            text-decoration: none;
+            display: flex; align-items: center; gap: 12px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .nav-item.active { background: var(--primary); color: white; }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 300px;
+            padding: 40px;
+            width: calc(100% - 340px);
+        }
+
+        .header-flex {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;
+        }
+
+        /* Profile Dropdown */
+        .profile-container { position: relative; display: inline-block; }
+        .profile-trigger {
+            background: white; border: none; padding: 8px 15px; border-radius: 30px;
+            display: flex; align-items: center; gap: 10px; cursor: pointer; box-shadow: var(--shadow);
+        }
+        .profile-trigger i { font-size: 1.5rem; color: var(--primary); background: #f0f0ff; padding: 8px; border-radius: 50%; }
+
+        .profile-dropdown {
+            position: absolute; top: 60px; right: 0; background: white; min-width: 220px;
+            border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 20px;
+            display: none; z-index: 100; text-align: left; border: 1px solid #f0f0f0;
+        }
+        .profile-dropdown.show { display: block; animation: fadeIn 0.2s ease-out; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .logout-link { color: var(--secondary); text-decoration: none; font-weight: 700; display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; }
+        .logout-link:hover { background: #fff0f3; }
+
+        /* Cards */
+        .card { background: white; padding: 30px; border-radius: 24px; box-shadow: var(--shadow); margin-bottom: 30px; }
+        .card h3 { margin-top: 0; color: var(--primary); font-family: 'Quicksand'; display: flex; align-items: center; gap: 10px; }
+
+        /* Search & Table */
+        .search-bar { width: 100%; padding: 12px 15px; border-radius: 15px; border: 2px solid #F0F0F0; margin-bottom: 20px; outline: none; }
+        .search-bar:focus { border-color: var(--primary); }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; color: #888; border-bottom: 2px solid #F8F9FE; }
+        td { padding: 15px; border-bottom: 1px solid #F8F9FE; font-weight: 600; }
+        
+        .streak-badge { background: #FFF0F3; color: var(--secondary); padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; }
+        
+        textarea { width: 100%; padding: 15px; border: 2px solid #F0F0F0; border-radius: 15px; margin-bottom: 15px; font-family: inherit; }
+        .btn-action { width: 100%; padding: 15px; border: none; border-radius: 30px; font-weight: 700; cursor: pointer; }
+        .btn-post { background: linear-gradient(135deg, var(--secondary), var(--blossom-color)); color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo"><span>🌸</span>GyanSetu<span>🌸</span></div>
+        <a href="#" class="nav-item active"><i class="fas fa-chart-line"></i> Dashboard</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header-flex">
+            <div>
+                <h1 style="font-family: 'Quicksand'; margin:0;">Teacher Portal</h1>
+                <p style="color: #777;">Review scores and class engagement.</p>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div id="date-box" style="font-weight: bold; color: var(--primary);"></div>
+                
+                <div class="profile-container">
+                    <button class="profile-trigger" onclick="toggleDropdown()">
+                        <i class="fas fa-user-tie"></i>
+                        <span id="display-name" style="font-weight: 700; color: var(--text);">Teacher</span>
+                    </button>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <div style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                            <span class="user-name" id="dropdown-name" style="font-weight: 700;">Prof. Name</span>
+                            <span class="user-email" id="dropdown-email" style="display: block; font-size: 0.8rem; color: #777;">email@gyansetu.edu</span>
+                        </div>
+                        <a href="teachsignin.html" class="logout-link" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px;">
+            <div class="card">
+                <h3><i class="fas fa-bullhorn"></i> Message of the Day</h3>
+                <textarea id="announcementInput" rows="5" placeholder="Post a message for students..."></textarea>
+                <button class="btn-action btn-post" onclick="updateNotice()">Update Announcement</button>
+            </div>
+
+            <div class="card">
+                <h3><i class="fas fa-fire"></i> Student Database</h3>
+                <input type="text" id="studentSearchBar" class="search-bar" placeholder="Search by username or name...">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Full Name</th>
+                            <th>Username</th>
+                            <th>Streak</th>
+                        </tr>
+                    </thead>
+                    <tbody id="streakBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+<!--  -->
+    <script>
+        // Set Today's Date
+        document.getElementById('date-box').innerText = new Date().toDateString();
+
+        // 1. Load Teacher Profile from Login Session
+        function initProfile() {
+            const teacherData = JSON.parse(localStorage.getItem('teacherInfo'));
+            if (teacherData) {
+                document.getElementById('display-name').innerText = teacherData.fullname;
+                document.getElementById('dropdown-name').innerText = teacherData.fullname;
+                document.getElementById('dropdown-email').innerText = teacherData.email;
+            } else {
+                window.location.href = 'teachsignin.html';
+            }
+        }
+
+        // 2. Fetch All Students initially
+        async function fetchAllStudents() {
+            try {
+                // Fetching using an empty query gets all students via the search route
+                const response = await fetch('http://localhost:3000/search-students?username=');
+                const data = await response.json();
+                if (data.success) {
+                    renderTable(data.students);
+                }
+            } catch (err) {
+                console.error("Load Error:", err);
+            }
+        }
+
+        // 3. Render Table Data
+        function renderTable(students) {
+            const tbody = document.getElementById('streakBody');
+            tbody.innerHTML = students.map(s => `
+                <tr>
+                    <td>${s.fullname}</td>
+                    <td style="color: var(--primary);">@${s.username}</td>
+                    <td><span class="streak-badge">🔥 ${s.streak} Days</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // 4. Live Search Handler
+        document.getElementById('studentSearchBar').addEventListener('input', async (e) => {
+            const query = e.target.value.trim();
+            try {
+                const response = await fetch(`http://localhost:3000/search-students?username=${query}`);
+                const data = await response.json();
+                if (data.success) {
+                    renderTable(data.students);
+                }
+            } catch (err) {
+                console.error("Search Error:", err);
+            }
+        });
+
+        // 5. Profile UI Logic
+        function toggleDropdown() {
+            document.getElementById('profileDropdown').classList.toggle('show');
+        }
+
+        function logout() {
+            localStorage.removeItem('teacherInfo');
+        }
+
+        function updateNotice() {
+            const msg = document.getElementById('announcementInput').value;
+            if(msg) {
+                localStorage.setItem('gyansetu_announcement', msg);
+                alert("Announcement updated for all students!");
+            }
+        }
+
+        // Close dropdown when clicking outside
+        window.onclick = function(event) {
+            if (!event.target.closest('.profile-container')) {
+                document.getElementById('profileDropdown').classList.remove('show');
+            }
+        }
+
+        // Combined Onload
+        window.onload = function() {
+            initProfile();
+            fetchAllStudents();
+        };
+
+
+        function updateNotice() {
+    const msg = document.getElementById('announcementInput').value;
+    if(msg) {
+        localStorage.setItem('gyansetu_announcement', msg); // Saves to shared storage
+        alert("Announcement updated for all students!");
+    }
+}
+
+    </script>
+</body>
+</html>

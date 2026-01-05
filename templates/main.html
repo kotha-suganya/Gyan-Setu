@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Gyan Setu - Login/Signup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600&family=Nunito:wght@400;700&family=Poppins:wght@700&display=swap" rel="stylesheet" />
+    
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --secondary: #FF6584;
+            --accent: #57E2A0;
+            --soft: #FFE6E6;
+            --dark: #22223B;
+            --text: #343459;
+            --video-gradient: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            --card-gradient: linear-gradient(120deg, #FCF6FF 60%, #D6FCFF 100%);
+            --shadow: 0 8px 24px rgba(0,0,0,0.08);
+            --blossom-color: #FF69B4;
+            --logoblue: #3B5998;
+            --tagline-green: #2E8B57;
+        }
+
+        body {
+            background: var(--video-gradient);
+            color: var(--text);
+            font-family: 'Nunito', 'Quicksand', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            position: relative; /* Required for absolute positioning of the video */
+            overflow: hidden; /* Hide video overflow */
+        }
+        
+        .background-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+        }
+
+        .login-container {
+            max-width: 400px;
+            width: 100%;
+            background: rgba(252, 246, 255, 0.9); /* Add a slight transparency for the video to show */
+            backdrop-filter: blur(5px); /* Optional: Add blur effect for better readability */
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            position: relative; /* Required to be above the video */
+            z-index: 1;
+        }
+        header {
+            width: 150%;
+        }
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--logoblue);
+            letter-spacing: 2px;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            animation: moveUpDown 3s ease-in-out infinite;
+        }
+        .logo .blossom {
+            font-size: 2.4rem;
+            margin: 0 10px;
+            color: var(--blossom-color);
+            animation: blossomPulse 2.5s infinite ease-in-out;
+            user-select: none;
+        }
+        @keyframes blossomPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        @keyframes moveUpDown {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .tagline {
+            margin-top: 6px;
+            font-size: 1.4rem;
+            color: var(--tagline-green);
+            letter-spacing: 0.8px;
+            font-family: 'Quicksand', sans-serif;
+            font-style: italic;
+            user-select: none;
+        }
+        .btn {
+            width: 100%;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            color: white;
+            border-radius: 30px;
+            font-weight: bold;
+            padding: 15px 28px;
+            cursor: pointer;
+            border: none;
+            font-size: 1.15rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(to left, var(--secondary), var(--primary));
+            box-shadow: 0 12px 24px rgba(255,101,132,0.1);
+        }
+        .signup-btn {
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+        }
+        .signup-btn:hover {
+            background: linear-gradient(to left, var(--primary), var(--secondary));
+        }
+    </style>
+</head>
+<body>
+
+<video autoplay muted loop playsinline class="background-video">
+    <source src="https://hrcdn.net/fcore/assets/onboarding/globe-5fdfa9a0f4.mp4" type="video/mp4">
+</video>
+
+<div class="login-container">
+    <header>
+        <div class="logo"><span class="blossom">🌸</span>Gyan Setu<span class="blossom">🌸</span></div>
+        <div class="tagline">From Villages To World Of Wisdom</div>
+    </header>
+    <button class="btn" onclick="window.location.href='signup.html'">Sign Up</button>
+    <button class="btn" onclick="window.location.href='signin.html'">Sign In</button>
+</div>
+
+</body>
+</html>

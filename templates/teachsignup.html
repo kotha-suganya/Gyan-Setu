@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Gyan Setu - Teacher Registration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600&family=Nunito:wght@400;700&family=Poppins:wght@700&display=swap" rel="stylesheet" />
+    
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --secondary: #FF6584;
+            --accent: #57E2A0;
+            --dark: #22223B;
+            --text: #343459;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --shadow: 0 8px 24px rgba(0,0,0,0.08);
+            --blossom-color: #FF69B4;
+            --logoblue: #3B5998;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text);
+            font-family: 'Nunito', 'Quicksand', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+
+        .signup-container {
+            max-width: 450px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--logoblue);
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .logo .blossom {
+            font-size: 1.8rem;
+            margin: 0 10px;
+            color: var(--blossom-color);
+        }
+
+        h2 {
+            font-family: 'Poppins', sans-serif;
+            color: var(--dark);
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 18px;
+            width: 100%;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            width: 100%;
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+            color: white;
+            border-radius: 30px;
+            font-weight: bold;
+            padding: 15px;
+            cursor: pointer;
+            border: none;
+            font-size: 1.1rem;
+            margin-top: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 101, 132, 0.3);
+        }
+
+        .footer-text {
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        .footer-text a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        body.dark-mode {
+    background: #121212 !important;
+    color: #E0E0E0 !important;
+}
+/* Add specific dark mode styles for your cards or containers here */
+    </style>
+</head>
+<body>
+
+<div class="signup-container">
+    <div class="logo"><span class="blossom">🌸</span>Gyan Setu<span class="blossom">🌸</span></div>
+    <h2>Teacher Registration</h2>
+
+    <form id="signupForm">
+    <div class="form-group">
+        <label><i class="fas fa-user"></i> Full Name</label>
+        <input type="text" id="fullname" placeholder="Enter your full name" required>
+    </div>
+    <div class="form-group">
+        <label><i class="fas fa-envelope"></i> Email Address</label>
+        <input type="email" id="email" placeholder="email@example.com" required>
+    </div>
+    <div class="form-group">
+        <label><i class="fas fa-book"></i> Subject Teaching</label>
+        <select id="subject" required>
+            <option value="" disabled selected>Select your subject</option>
+            <option value="mathematics">Mathematics</option>
+            <option value="science">Science</option>
+            </select>
+    </div>
+    <div class="form-group">
+        <label><i class="fas fa-lock"></i> Password</label>
+        <input type="password" id="password" placeholder="Create a password" required>
+    </div>
+    <div class="form-group">
+        <label><i class="fas fa-shield-alt"></i> Confirm Password</label>
+        <input type="password" id="confirmPassword" placeholder="Repeat your password" required>
+    </div>
+    <button type="submit" class="btn">Create Teacher Account</button>
+</form>
+    <div class="footer-text">
+        Already have an account? <a href="teachsignin.html">Sign In here</a>
+    </div>
+</div>
+
+<!-- <script>
+document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); // Stop page refresh
+
+    const fullname = document.getElementById('fullname').value;
+    const email = document.getElementById('email').value;
+    const subject = document.getElementById('subject').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (password !== confirmPassword) {
+        alert("Passwords do not match!");
+        return;
+    }
+
+    try {
+        const response = await fetch('/teachsignup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fullname, email, subject, password })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert("Registration successful!");
+            window.location.href = 'teachsignin.html'; // Redirect to sign-in page
+        } else {
+            alert(result.message);
+        }
+    } catch (error) {
+        console.error("Signup error:", error);
+        alert("Server error. Please try again later.");
+    }
+});
+</script> -->
+<script>
+document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); 
+
+    // 1. Capture values using IDs
+    const fullname = document.getElementById('fullname').value;
+    const email = document.getElementById('email').value;
+    const subject = document.getElementById('subject').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    // 2. Validate passwords match before sending to server
+    if (password !== confirmPassword) {
+        alert("Passwords do not match!");
+        return;
+    }
+
+    try {
+        // 3. Send the request to your Node.js server
+        const response = await fetch('http://localhost:3000/teachsignup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fullname, email, subject, password })
+        });
+
+        const result = await response.json();
+
+        // 4. Handle the redirection logic
+        if (result.success) {
+            
+            // Use the absolute path if your server is serving the files
+            window.location.href = "teachsignin.html"; 
+        } else {
+            alert("Registration failed: " + result.message);
+        }
+    } catch (err) {
+        console.error("Connection error:", err);
+        alert("Cannot connect to server. Ensure server.js is running on port 3000.");
+    }
+});
+</script>
+</body>
+</html>
