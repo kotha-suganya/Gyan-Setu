@@ -219,40 +219,28 @@ app.get('/teachsignin', (req, res) => res.sendFile(path.join(__dirname, 'templat
 app.get('/teachindex', (req, res) => res.sendFile(path.join(__dirname, 'templates', 'teachindex.html')));
 app.get('/teachsignup', (req, res) => res.sendFile(path.join(__dirname, 'templates', 'teachsignup.html')));
 
+// Search Students Route (For Teacher Dashboard)
+app.get('/search-students', (req, res) => {
+    const searchTerm = req.query.username || "";
+    
+    // Use LIKE for partial matching on username OR fullname
+    const query = `
+        SELECT fullname, username, streak 
+        FROM users 
+        WHERE username LIKE ? OR fullname LIKE ?
+    `;
+    const params = [`%${searchTerm}%`, `%${searchTerm}%` ];
 
-app.listen(3000, () => console.log('Server running on http://localhost:3001'));
+    db.all(query, params, (err, rows) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ success: false, message: "Database error" });
+        }
+        res.json({ success: true, students: rows });
+    });
+});
 
-
-
-
-
-
-// // #################              teacher dashboard            ##########################
-
-
-// // Add this under the existing users table creation in server.js
-// // Ensure this table creation runs at the top with your student table
-// db.run(`CREATE TABLE IF NOT EXISTS teachers (
-//     id INTEGER PRIMARY KEY AUTOINCREMENT,
-//     fullname TEXT,
-//     email TEXT UNIQUE,
-//     subject TEXT,
-//     password TEXT
-// )`);
-
-// // Endpoint to handle Teacher Signup
-// app.post('/teachsignup', (req, res) => {
-//     const { fullname, email, subject, password } = req.body;
-
-//     // Check for existing email
-//     db.get("SELECT * FROM teachers WHERE email = ?", [email], (err, row) => {
-//         if (err) return res.status(500).json({ success: false, message: "Database error" });
-//         if (row) return res.status(400).json({ success: false, message: "Email already registered." });
-
-//         const query = `INSERT INTO teachers (fullname, email, subject, password) VALUES (?, ?, ?, ?)`;
-//         db.run(query, [fullname, email, subject, password], function(err) {
-//             if (err) return res.status(500).json({ success: false, message: "Error saving teacher." });
-//             res.status(201).json({ success: true });
-//         });
-//     });
-// });
+const PORT = 3000;
+app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+});
