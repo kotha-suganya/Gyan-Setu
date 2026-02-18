@@ -66,38 +66,44 @@ def chat():
 @app.route('/visuals', methods=['POST'])
 def get_visuals():
     data = request.json
-    user_query = data.get('query')
+    # Make sure this variable name 'user_query' is defined here!
+    user_query = data.get('query') 
     subject = data.get('subject')
 
     if not YOUTUBE_API_KEY:
-        return jsonify({'video_id': 'dQw4w9WgXcQ'}) # Return a default video
+        # Return the structure the frontend expects, even for defaults
+        return jsonify({'videos': [{'video_id': 'dQw4w9WgXcQ', 'title': 'Default', 'thumbnail': ''}]})
 
     try:
-        # Construct a targeted search query
+        # Now 'user_query' exists and can be used below
         search_query = f"{user_query} {subject} tutorial"
         
-        # Make the actual API call to YouTube
         search_response = youtube.search().list(
             q=search_query,
             part='snippet',
-            maxResults=1,
+            maxResults=4,
             type='video'
         ).execute()
 
-        # Extract the video ID from the response
-        if search_response['items']:
-            video_id = search_response['items'][0]['id']['videoId']
-        else:
-            video_id = 'dQw4w9WgXcQ' # Default video if no results found
+        videos = []
+        for item in search_response.get('items', []):
+            videos.append({
+                'video_id': item['id']['videoId'],
+                'title': item['snippet']['title'],
+                'thumbnail': item['snippet']['thumbnails']['default']['url']
+            })
+
+        if not videos:
+            videos.append({'video_id': 'dQw4w9WgXcQ', 'title': 'No Results Found', 'thumbnail': ''})
+
+        return jsonify({'videos': videos})
 
     except Exception as e:
         print(f"Error calling YouTube API: {e}")
-        video_id = 'dQw4w9WgXcQ' # Default video on error
+        return jsonify({'videos': [{'video_id': 'dQw4w9WgXcQ', 'title': 'Error', 'thumbnail': ''}]})
+    
 
-    return jsonify({
-        'video_id': video_id,
-        'visual_url': f'https://www.youtube.com/watch?v={video_id}'
-    })
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 

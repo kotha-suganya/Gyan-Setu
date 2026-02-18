@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app)
 
 # IMPORTANT: Replace "YOUR_API_KEY" with your actual Google API key.
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY1")
+GEMINI_API_KEY = os.getenv("QUIZ")
 
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)

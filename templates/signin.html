@@ -322,6 +322,7 @@ form.addEventListener('submit', async function(e) {
         });
         const data = await response.json();
         if (data.success) {
+            // Store user info for the dashboard
             localStorage.setItem('currentUser', JSON.stringify(data.user)); 
             window.location.href = 'index.html';
         } else {

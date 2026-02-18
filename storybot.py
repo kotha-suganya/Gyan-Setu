@@ -16,7 +16,7 @@ import google.generativeai as genai
 load_dotenv()
 
 # Get the key without providing a hardcoded fallback
-api_key = os.getenv('GEMINI_API_KEY1')
+api_key = os.getenv('STORY')
 
 if not api_key:
     raise ValueError("No API key found. Please set GEMINI_API_KEY in your .env file.")

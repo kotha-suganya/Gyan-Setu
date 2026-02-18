@@ -148,30 +148,59 @@
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px;">
-            <div class="card">
-                <h3><i class="fas fa-bullhorn"></i> Message of the Day</h3>
-                <textarea id="announcementInput" rows="5" placeholder="Post a message for students..."></textarea>
-                <button class="btn-action btn-post" onclick="updateNotice()">Update Announcement</button>
-            </div>
+
+       
+<div class="card">
+    <h3><i class="fas fa-bullhorn"></i> Send Message</h3>
+    <select id="targetType" class="search-bar">
+        <option value="all">Everyone</option>
+        <option value="class">Specific Class & Section</option>
+        <option value="student">Specific Student (Username)</option>
+    </select>
+    
+    <input type="text" id="targetValue" class="search-bar" placeholder="Enter Class-Section (e.g. 10-A) or Username" style="display:none;">
+    
+    <textarea id="announcementInput" rows="3" placeholder="Write your message..."></textarea>
+    <button class="btn-action btn-post" onclick="sendTargetedMessage()">Send Message</button>
+</div>
+
+
+    <div class="card">
+    <h3><i class="fas fa-filter"></i> Filter Students</h3>
+    <div style="display: flex; gap: 10px;">
+        <select id="filterClass" class="search-bar">
+            <option value="">All Classes</option>
+            <option value="1">1th Grade</option>
+            <option value="2">2th Grade</option>
+            <option value="3">3th Grade</option>
+            <option value="4">4th Grade</option>
+            <option value="5">5th Grade</option>
+            <option value="6">6th Grade</option>
+            <option value="7">7th Grade</option>
+            <option value="8">8th Grade</option>
+            <option value="9">9th Grade</option>
+            <option value="10">10th Grade</option>
+        </select>
+        <input type="text" id="filterSection" class="search-bar" placeholder="Section (A, B...)">
+    </div>
+</div>
+
 
             <div class="card">
-                <h3><i class="fas fa-fire"></i> Student Database</h3>
-                <input type="text" id="studentSearchBar" class="search-bar" placeholder="Search by username or name...">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Full Name</th>
-                            <th>Username</th>
-                            <th>Streak</th>
-                        </tr>
-                    </thead>
-                    <tbody id="streakBody">
-                        </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+    <h3><i class="fas fa-fire"></i> Student Database</h3>
+    <input type="text" id="studentSearchBar" class="search-bar" placeholder="Search by username or name...">
+    <table>
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Username</th>
+            <th>Current Streak</th>
+            <th>Highest Streak</th> </tr>
+    </thead>
+    <tbody id="streakBody">
+        </tbody>
+</table>
+</div>
 <!--  -->
     <script>
         // Set Today's Date
@@ -204,18 +233,33 @@
         }
 
         // 3. Render Table Data
-        function renderTable(students) {
-            const tbody = document.getElementById('streakBody');
-            tbody.innerHTML = students.map(s => `
-                <tr>
-                    <td>${s.fullname}</td>
-                    <td style="color: var(--primary);">@${s.username}</td>
-                    <td><span class="streak-badge">🔥 ${s.streak} Days</span></td>
-                </tr>
-            `).join('');
-        }
+// Inside the <script> section of teachindex.html
+function renderTable(students) {
+    const tbody = document.getElementById('streakBody');
+    if (students.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#999;">No students found matching these filters.</td></tr>`;
+        return;
+    }
 
-        // 4. Live Search Handler
+    tbody.innerHTML = students.map(s => `
+        <tr>
+            <td>
+                ${s.fullname} 
+                <small style="display:block; color:#888; font-size:0.75rem;">
+                    Class: ${s.class || 'N/A'}-${s.section || 'N/A'}
+                </small>
+            </td>
+            <td style="color: var(--primary);">@${s.username}</td>
+            <td><span class="streak-badge">🔥 ${s.streak || 0} Days</span></td>
+            <td>
+                <span class="streak-badge" style="background:#FFF8E1; color:#FF8F00;">
+                    🏆 ${s.highest_streak || 0} Record
+                </span>
+            </td>
+        </tr>
+    `).join('');
+}
+// 4. Live Search Handler
         document.getElementById('studentSearchBar').addEventListener('input', async (e) => {
             const query = e.target.value.trim();
             try {
@@ -268,6 +312,139 @@
     }
 }
 
+// Toggle input visibility based on selection
+document.getElementById('targetType').addEventListener('change', function() {
+    const val = this.value;
+    const input = document.getElementById('targetValue');
+    input.style.display = (val === 'all') ? 'none' : 'block';
+    input.placeholder = (val === 'class') ? "Format: Class-Section (e.g. 10-A)" : "Enter Student Username";
+});
+
+async function sendTargetedMessage() {
+    const type = document.getElementById('targetType').value;
+    const value = type === 'all' ? 'all' : document.getElementById('targetValue').value;
+    const msg = document.getElementById('announcementInput').value;
+    
+    const teacherData = JSON.parse(localStorage.getItem('teacherInfo'));
+    const teacherName = teacherData ? teacherData.fullname : "Teacher";
+    const teacherSubject = teacherData ? teacherData.subject : "General";
+
+    if (!msg.trim()) return alert("Please enter a message.");
+
+    // Create a new message object with a unique ID and current time
+    const newAnnouncement = { 
+        id: Date.now(), // Unique ID for deletion logic
+        type, 
+        target: value, 
+        message: msg, 
+        teacher: teacherName,
+        subject: teacherSubject,
+        timestamp: Date.now() // Used for the 24-hour auto-delete
+    };
+
+    // Get existing list from storage or start a new one
+    let announcementList = JSON.parse(localStorage.getItem('gyansetu_announcement_list')) || [];
+    
+    // Add new message to the list
+    announcementList.push(newAnnouncement);
+    
+    // Save the updated list
+    localStorage.setItem('gyansetu_announcement_list', JSON.stringify(announcementList));
+    
+    alert("Message Sent successfully!");
+    document.getElementById('announcementInput').value = ""; // Clear the input
+}
+
+// 1. Unified function to fetch students based on ALL active filters
+async function fetchFilteredStudents() {
+    const nameQuery = document.getElementById('studentSearchBar').value.trim();
+    const classFilter = document.getElementById('filterClass').value;
+    const sectionFilter = document.getElementById('filterSection').value.trim();
+
+    try {
+        // Construct the URL with all parameters
+        const url = new URL('http://localhost:3000/search-students');
+        url.searchParams.append('username', nameQuery);
+        if (classFilter) url.searchParams.append('class', classFilter);
+        if (sectionFilter) url.searchParams.append('section', sectionFilter);
+
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.success) {
+            renderTable(data.students);
+        }
+    } catch (err) {
+        console.error("Filter Error:", err);
+    }
+}
+
+// 2. Add Event Listeners to all filter inputs
+document.getElementById('studentSearchBar').addEventListener('input', fetchFilteredStudents);
+document.getElementById('filterClass').addEventListener('change', fetchFilteredStudents);
+document.getElementById('filterSection').addEventListener('input', fetchFilteredStudents);
+
+// 3. Update the Render Table function to show Class/Section (Optional but helpful)
+function renderTable(students) {
+    const tbody = document.getElementById('streakBody');
+    if (students.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#999;">No students found matching these filters.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = students.map(s => `
+        <tr>
+            <td>
+                ${s.fullname} 
+                <small style="display:block; color:#888; font-size:0.75rem;">
+                    Class: ${s.class || 'N/A'}-${s.section || 'N/A'}
+                </small>
+            </td>
+            <td style="color: var(--primary);">@${s.username}</td>
+            <td><span class="streak-badge">🔥 ${s.streak || 0} Days</span></td>
+            <td>
+                <span class="streak-badge" style="background:#FFF8E1; color:#FF8F00;">
+                    🏆 ${s.highest_streak || 0} Record
+                </span>
+            </td>
+        </tr>
+    `).join('');
+}
+// 4. Update the Onload to use the new unified fetch
+window.onload = function() {
+    initProfile();
+    fetchFilteredStudents(); // Fetches everyone initially
+};
+
+// Function to get all filter values and update the table
+async function updateStudentTable() {
+    const nameQuery = document.getElementById('studentSearchBar').value.trim();
+    const classFilter = document.getElementById('filterClass').value;
+    const sectionFilter = document.getElementById('filterSection').value.trim();
+
+    try {
+        // Construct the URL with all parameters
+        const response = await fetch(`http://localhost:3000/search-students?username=${nameQuery}&class=${classFilter}&section=${sectionFilter}`);
+        const data = await response.json();
+
+        if (data.success) {
+            renderTable(data.students); // This will now use the 4-column layout
+        }
+    } catch (err) {
+        console.error("Filtering Error:", err);
+    }
+}
+
+// Attach listeners to ALL filter elements
+document.getElementById('studentSearchBar').addEventListener('input', updateStudentTable);
+document.getElementById('filterClass').addEventListener('change', updateStudentTable);
+document.getElementById('filterSection').addEventListener('input', updateStudentTable);
+
+// Ensure the table loads when the page opens
+window.addEventListener('load', () => {
+    initProfile();
+    updateStudentTable();
+});
     </script>
 </body>
 </html>

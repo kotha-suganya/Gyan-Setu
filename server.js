@@ -8,113 +8,121 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'templates')));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // Initialize Database
 const db = new sqlite3.Database('./gyansetuu.db', (err) => {
     if (err) console.error(err.message);
-    console.log('Connected to Gyan Setuu SQLite database.');
+    console.log('Connected to Gyan Setu SQLite database.');
 });
 
-// Create Users Table
-db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    fullname TEXT,
-    contact TEXT UNIQUE,
-    username TEXT UNIQUE,
-    password TEXT,
-    security_question TEXT,
-    security_answer TEXT,
-    streak INTEGER DEFAULT 0,
-    last_login_date TEXT
-)`);
+// Create Tables
+db.serialize(() => {
+    // 1. Users Table
+    db.run(`CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        fullname TEXT,
+        contact TEXT UNIQUE,
+        username TEXT UNIQUE,
+        password TEXT,
+        security_question TEXT,
+        security_answer TEXT,
+        class TEXT,
+        section TEXT,
+        streak INTEGER DEFAULT 0,
+        highest_streak INTEGER DEFAULT 0,
+        last_login_date TEXT
+    )`);
 
+    // 2. Teachers Table
+    db.run(`CREATE TABLE IF NOT EXISTS teachers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        fullname TEXT,
+        email TEXT UNIQUE,
+        subject TEXT,
+        password TEXT
+    )`);
 
-// const path = require('path');
-// This tells Express to serve files inside the "assets" folder
-app.use('/assets', express.static(path.join(__dirname, 'assets')));
+    // 3. Announcements Table
+    db.run(`CREATE TABLE IF NOT EXISTS announcements (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        message TEXT,
+        target_type TEXT, 
+        target_value TEXT, 
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+});
 
-
-
-
-// Navigation Routes
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'templates', 'signin.html')));
-app.get('/signin', (req, res) => res.sendFile(path.join(__dirname, 'templates', 'signin.html')));
-app.get('/signup', (req, res) => res.sendFile(path.join(__dirname, 'templates', 'signup.html')));
-app.get('/index', (req, res) => res.sendFile(path.join(__dirname, 'templates', 'index.html')));
-
-// Sign Up Route
-// app.post('/signup', (req, res) => {
-//     const { fullname, contact, username, password, security_question, security_answer } = req.body;
-//     const sql = `INSERT INTO users (fullname, contact, username, password, security_question, security_answer, streak) VALUES (?, ?, ?, ?, ?, ?, 0)`;
-    
-//     db.run(sql, [fullname, contact, username, password, security_question, security_answer], function(err) {
-//         if (err) return res.status(400).json({ success: false, message: "User with this contact or username already exists." });
-//         res.json({ success: true });
-//     });
-//     res.status(201).json({ 
-//         success: true, 
-//         message: "User registered successfully" 
-//     });
-// });
+// --- STUDENT ROUTES ---
 
 app.post('/signup', (req, res) => {
-    const { fullname, contact, username, password, security_question, security_answer } = req.body;
-
-    // 1. Check if user already exists
+    const { fullname, contact, username, password, security_question, security_answer, class: studentClass, section } = req.body;
+    
     db.get("SELECT * FROM users WHERE username = ? OR contact = ?", [username, contact], (err, row) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ success: false, message: "Database error" });
-        }
-        
         if (row) {
-            return res.status(400).json({ success: false, message: "User already exists with this username or contact." });
+            return res.status(400).json({ success: false, message: "User already exists with this username or contact number." });
         }
 
-        // 2. Insert the new user
-        const query = `INSERT INTO users (fullname, contact, username, password, security_question, security_answer, streak) VALUES (?, ?, ?, ?, ?, ?, 0)`;
+        const query = `INSERT INTO users (fullname, contact, username, password, security_question, security_answer, class, section, streak, highest_streak) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0)`;
         
-        db.run(query, [fullname, contact, username, password, security_question, security_answer], function(err) {
+        db.run(query, [fullname, contact, username, password, security_question, security_answer, studentClass, section], function(err) {
             if (err) {
-                console.error(err);
-                return res.status(500).json({ success: false, message: "Error creating user account." });
+                console.error("Signup Error:", err.message);
+                return res.status(500).json({ success: false, message: "Database error during signup." });
             }
-
-            // 3. Success response
-            return res.status(201).json({ 
-                success: true, 
-                message: "User registered successfully" 
-            });
+            res.status(201).json({ success: true });
         });
     });
 });
-// Sign In Route with Streak Logic
+
 app.post('/signin', (req, res) => {
     const { username, password } = req.body;
-    db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, user) => {
-        if (err || !user) return res.status(404).json({ success: false, message: "Account does not exist. Please Sign Up." });
-        if (user.password !== password) return res.status(401).json({ success: false, message: "Incorrect password." });
 
-        const now = new Date();
-        const today = now.toISOString().split('T')[0];
-        let newStreak = user.streak || 0;
+    db.get(
+        `SELECT * FROM users WHERE username = ?`,
+        [username],
+        (err, user) => {
+            if (err || !user) {
+                return res.status(404).json({ success: false, message: "Account not found" });
+            }
 
-        if (!user.last_login_date) {
-            newStreak = 1;
-        } else if (user.last_login_date !== today) {
-            const lastLogin = new Date(user.last_login_date);
-            const diffDays = Math.floor((now - lastLogin) / (1000 * 60 * 60 * 24));
-            if (diffDays === 1) newStreak++;
-            else if (diffDays > 1) newStreak = 1;
+            if (user.password !== password) {
+                return res.status(401).json({ success: false, message: "Incorrect password" });
+            }
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            let newStreak = 1;
+
+            if (user.last_login_date) {
+                const last = new Date(user.last_login_date);
+                const today = new Date(todayStr);
+                const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
+
+                if (diffDays === 0) newStreak = user.streak;
+                else if (diffDays === 1) newStreak = user.streak + 1;
+            }
+
+            const highest = Math.max(newStreak, user.highest_streak || 0);
+
+            db.run(
+                `UPDATE users SET last_login_date=?, streak=?, highest_streak=? WHERE id=?`,
+                [todayStr, newStreak, highest, user.id],
+                () => {
+                    res.json({
+                        success: true,
+                        user: {
+                            ...user,
+                            streak: newStreak,
+                            highest_streak: highest,
+                            last_login_date: todayStr
+                        }
+                    });
+                }
+            );
         }
-
-        db.run(`UPDATE users SET last_login_date = ?, streak = ? WHERE id = ?`, [today, newStreak, user.id], () => {
-            res.json({ success: true, user: { fullname: user.fullname, username: user.username, streak: newStreak } });
-        });
-    });
+    );
 });
 
-// Forgot Password Flow
 app.post('/forgot-password', (req, res) => {
     const { mobile } = req.body;
     db.get(`SELECT security_question FROM users WHERE contact = ?`, [mobile], (err, row) => {
@@ -123,122 +131,73 @@ app.post('/forgot-password', (req, res) => {
     });
 });
 
-// app.post('/verify-answer', (req, res) => {
-//     const { mobile, answer } = req.body;
-//     db.get(`SELECT password FROM users WHERE contact = ? AND security_answer = ?`, [mobile, answer], (err, row) => {
-//         if (err || !row) return res.status(401).json({ success: false, message: "Incorrect answer." });
-//         res.json({ success: true, password: row.password });
-//     });
-// });
-
-
-
-// Verify answer and return the password
 app.post('/verify-answer', (req, res) => {
-    // Note: ensure the frontend sends 'security_answer' or 'answer' consistently
     const { mobile, answer } = req.body; 
-    
     db.get(`SELECT password FROM users WHERE contact = ? AND security_answer = ?`, 
     [mobile, answer], (err, row) => {
         if (err) return res.status(500).json({ success: false, message: "Database error." });
         if (!row) return res.status(401).json({ success: false, message: "Incorrect answer." });
-        
-        // Return the password to the user
         res.json({ success: true, password: row.password });
     });
 });
 
+// --- TEACHER ROUTES ---
 
-
-app.listen(3000, () => console.log('Server running on http://localhost:3000'));
-
-
-// Add Teacher table creation at the top with other tables
-db.run(`CREATE TABLE IF NOT EXISTS teachers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    fullname TEXT,
-    email TEXT UNIQUE,
-    subject TEXT,
-    password TEXT
-)`);
-
-// Create the signup route
 app.post('/teachsignup', (req, res) => {
     const { fullname, email, subject, password } = req.body;
     const query = `INSERT INTO teachers (fullname, email, subject, password) VALUES (?, ?, ?, ?)`;
     
     db.run(query, [fullname, email, subject, password], function(err) {
         if (err) {
-            console.error(err.message);
             return res.status(400).json({ success: false, message: "Email already exists." });
         }
         res.json({ success: true });
     });
 });
 
-
-// Teacher Sign In Route
-// Teacher Sign In Route
-
 app.post('/teacher-signin', (req, res) => {
     const { email, password } = req.body;
-    
-    // Search the teachers table for the provided email
     db.get(`SELECT * FROM teachers WHERE email = ?`, [email], (err, teacher) => {
-        if (err || !teacher) {
-            return res.status(404).json({ success: false, message: "Teacher account not found." });
-        }
-        
-        // Verify that the password matches
-        if (teacher.password !== password) {
-            return res.status(401).json({ success: false, message: "Incorrect password." });
-        }
-
-        // Return the teacher's profile data to be stored in the frontend
-        res.json({ 
-            success: true, 
-            teacher: { 
-                fullname: teacher.fullname, 
-                email: teacher.email, 
-                subject: teacher.subject 
-            } 
-        });
+        if (err || !teacher) return res.status(404).json({ success: false, message: "Teacher account not found." });
+        if (teacher.password !== password) return res.status(401).json({ success: false, message: "Incorrect password." });
+        res.json({ success: true, teacher: { fullname: teacher.fullname, email: teacher.email, subject: teacher.subject } });
     });
 });
 
+// --- NAVIGATION & SEARCH ---
 
-// Add this in the Navigation Routes section
-// Navigation Route for the Teacher Dashboard
-app.get('/teachindex', (req, res) => {
-    res.sendFile(path.join(__dirname, 'templates', 'teachindex.html'));
-});
-
-
-// Navigation Routes in server.js
-app.get('/teachsignin', (req, res) => res.sendFile(path.join(__dirname, 'templates', 'teachsignin.html')));
-app.get('/teachindex', (req, res) => res.sendFile(path.join(__dirname, 'templates', 'teachindex.html')));
-app.get('/teachsignup', (req, res) => res.sendFile(path.join(__dirname, 'templates', 'teachsignup.html')));
-
-// Search Students Route (For Teacher Dashboard)
+// server.js - Updated Search Students Route
+// server.js - Ensure 'highest_streak' is in the query
+// server.js snippet
+// server.js - Updated Search Students Route
 app.get('/search-students', (req, res) => {
-    const searchTerm = req.query.username || "";
+    const { username, class: sClass, section } = req.query;
     
-    // Use LIKE for partial matching on username OR fullname
-    const query = `
-        SELECT fullname, username, streak 
-        FROM users 
-        WHERE username LIKE ? OR fullname LIKE ?
-    `;
-    const params = [`%${searchTerm}%`, `%${searchTerm}%` ];
+    // Ensure 'highest_streak' is included in this SELECT statement
+    let query = `SELECT fullname, username, streak, highest_streak, class, section FROM users WHERE 1=1`;
+    let params = [];
+
+    if (username) {
+        query += ` AND (username LIKE ? OR fullname LIKE ?)`;
+        params.push(`%${username}%`, `%${username}%`);
+    }
+    if (sClass) {
+        query += ` AND class = ?`;
+        params.push(sClass);
+    }
+    if (section) {
+        query += ` AND section = ?`;
+        params.push(section.toUpperCase());
+    }
 
     db.all(query, params, (err, rows) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ success: false, message: "Database error" });
-        }
+        if (err) return res.status(500).json({ success: false, message: "Database error" });
         res.json({ success: true, students: rows });
     });
 });
+app.get('/teachsignin', (req, res) => res.sendFile(path.join(__dirname, 'templates', 'teachsignin.html')));
+app.get('/teachindex', (req, res) => res.sendFile(path.join(__dirname, 'templates', 'teachindex.html')));
+app.get('/teachsignup', (req, res) => res.sendFile(path.join(__dirname, 'templates', 'teachsignup.html')));
 
 const PORT = 3000;
 app.listen(PORT, () => {

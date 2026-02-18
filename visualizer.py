@@ -19,7 +19,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Configure the Gemini API using the environment variable
-api_key = os.getenv('GEMINI_API_KEY3')
+api_key = os.getenv('VISUALIZER')
 
 if not api_key:
     raise ValueError("GEMINI_API_KEY not found. Ensure it is set in your .env file.")
@@ -44,10 +44,11 @@ def generate_map():
 
         # Prompt the Gemini API to generate Mermaid syntax for a flowchart
         prompt = (
-    f"You are an expert tutor in {subject}. Your task is to generate a flowchart or mind map for the topic '{topic}' in the context of {subject}. "
+    f"You are an expert tutor in {subject}. Your task is to generate a simple, high-level flowchart or mind map for the topic '{topic}' in the context of {subject}. "
+    f"The diagram must be easy for small children to understand; avoid complex structures, jargon, or deep subtopics. "
     f"Provide only the Mermaid.js code, with no additional text or explanations. "
     f"Start with a valid Mermaid diagram type like 'graph TD' or 'mindmap'. "
-    f"Use clear and concise labels for nodes and links. "
+    f"If the subject is 'Telugu', the entire output (labels, nodes, and text) must be strictly in the Telugu language only. "
     f"If the topic is not relevant to the subject, respond with 'This topic is not relevant to the selected subject.' and nothing else."
 )
 

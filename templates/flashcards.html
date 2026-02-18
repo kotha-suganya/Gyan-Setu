@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GyanSetu AI Flashcards</title>
+    <style>
+:root {
+    --primary: #6C63FF;
+    --secondary: #FF6584;
+    --accent: #57E2A0; 
+    --soft: #FFE6E6;
+    --dark: #22223B; 
+    --text: #343459;
+    --error: #dc3545;
+    --success: #28a745;
+    --video-gradient: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+    --card-gradient: linear-gradient(120deg, #FCF6FF 60%, #D6FCFF 100%);
+    --shadow: 0 8px 24px rgba(0,0,0,0.08);
+    --blossom-color: #FF69B4;
+    --logoblue: #3B5998;
+    --tagline-green: #2E8B57;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--video-gradient);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px 20px 40px;
+}
+
+/* Header */
+header {
+    padding: 10px;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+.logo {
+    font-family: 'Poppins', sans-serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--logoblue);
+    letter-spacing: 2px;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    animation: moveUpDown 3s ease-in-out infinite;
+}
+
+.logo .blossom {
+    font-size: 2.4rem;
+    margin: 0 10px;
+    color: var(--blossom-color);
+    animation: blossomPulse 2.5s infinite ease-in-out;
+    user-select: none;
+}
+
+/* Heading */
+h1 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    color: var(--logoblue);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Search bar */
+.search-container {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    max-width: 650px;
+    margin: 10px 0 30px;
+}
+
+input {
+    flex: 1;
+    padding: 14px 18px;
+    border: 1px solid #dedff0;
+    border-radius: 30px;
+    font-size: 15px;
+    background: white;
+    color: var(--dark);
+    transition: all 0.2s ease;
+}
+
+input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(108,99,255,0.25);
+    outline: none;
+}
+
+/* Button */
+button {
+    padding: 14px 28px;
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background: linear-gradient(to right, #2dbb40, #32a2ce);
+    box-shadow: 0 4px 12px rgba(41, 223, 41, 0.4);
+    transform: translateY(-2px);
+}
+
+button:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Loading text */
+#loading {
+    display: none;
+    color: var(--primary);
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+/* Flashcards grid */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    width: 100%;
+    max-width: 1100px;
+}
+
+/* Flashcard */
+.flashcard-container {
+    perspective: 1000px;
+    height: 200px;
+    cursor: pointer;
+}
+
+.flashcard-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+.flipped .flashcard-inner {
+    transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    box-sizing: border-box;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+/* Front card – purple → pink */
+.card-front {
+    background: linear-gradient(135deg, #6C63FF, #FF6584);
+    color: white;
+    font-weight: 600;
+}
+
+/* Back card – mint → sky */
+.card-back {
+    background: linear-gradient(135deg, #57E2A0, #6EC6FF);
+    transform: rotateY(180deg);
+    color: #22223B;
+    font-weight: 500;
+}
+
+
+/* Responsive */
+@media (max-width: 480px) {
+    .search-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    .flashcard-container {
+        height: 220px;
+    }
+}
+</style>
+
+
+</head>
+<body>
+
+    <header>
+            <div class="logo"><span class="blossom"></span> FlashCards <span class="blossom"></span></div>
+        </header>
+    <div class="search-container">
+        <input type="text" id="userQuery" placeholder="Enter topic (e.g. Python Loops)">
+        <button id="generateBtn">Generate</button>
+    </div>
+
+    <div id="loading">✨ AI is thinking...</div>
+    <div id="flashcards-grid" class="cards-grid"></div>
+
+    <!-- IMPORT MAP -->
+    <script type="importmap">
+    {
+      "imports": {
+        "@google/genai": "https://esm.sh/@google/genai"
+      }
+    }
+    </script>
+
+    <!-- MAIN SCRIPT -->
+    <script type="module">
+    import { GoogleGenAI } from "@google/genai";
+
+    // 🔑 ADD YOUR API KEY HERE
+    const API_KEY = "AIzaSyDuGlUKtB1zNbDzLbOO3CG7VkojfEL1iRg"; 
+
+    const btn = document.getElementById('generateBtn');
+    const input = document.getElementById('userQuery');
+    const grid = document.getElementById('flashcards-grid');
+    const loader = document.getElementById('loading');
+
+    btn.addEventListener('click', async () => {
+        const topic = input.value.trim();
+        if (!topic) return alert("Please enter a topic!");
+        if (API_KEY.includes("PASTE")) return alert("Please add your API Key!");
+
+        btn.disabled = true;
+        loader.style.display = "block";
+        grid.innerHTML = "";
+
+        try {
+            const ai = new GoogleGenAI({ apiKey: API_KEY });
+
+            const prompt = `Generate 6 flashcards about ${topic}. 
+Return ONLY a raw JSON array.
+Example format:
+[{"front": "Question", "back": "Answer"}]`;
+
+            const response = await ai.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: [{ role: "user", parts: [{ text: prompt }] }]
+            });
+
+            const text = response.candidates[0].content.parts[0].text;
+
+            // Extract JSON safely
+            const start = text.indexOf('[');
+            const end = text.lastIndexOf(']') + 1;
+            const jsonStr = text.substring(start, end);
+            const cards = JSON.parse(jsonStr);
+
+            cards.forEach(card => {
+                const el = document.createElement('div');
+                el.className = 'flashcard-container';
+                el.innerHTML = `
+                    <div class="flashcard-inner">
+                        <div class="card-front"><strong>${card.front}</strong></div>
+                        <div class="card-back">${card.back}</div>
+                    </div>`;
+                el.onclick = () => el.classList.toggle('flipped');
+                grid.appendChild(el);
+            });
+
+        } catch (err) {
+            console.error("Critical Error:", err);
+            alert("Error: " + err.message);
+        } finally {
+            btn.disabled = false;
+            loader.style.display = "none";
+        }
+    });
+    </script>
+
+</body>
+</html>

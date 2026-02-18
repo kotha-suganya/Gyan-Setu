@@ -448,9 +448,12 @@
     <div class="profile-dropdown" id="profileDropdown" role="menu" aria-hidden="true">
       <p><strong id="ddFullname">Full Name</strong></p>
       <p>Username: <span id="ddUsername">username</span></p>
-      <p>🔥 Streak: <span id="ddStreak">0</span></p>
-      <button class="btn-logout" id="logoutBtn" type="button">Logout</button>
+ 
+  <p>🔥 Current Streak: <strong id="ddStreak" style="color: var(--secondary);">0</strong></p>
+  <p>🏆 Highest Streak: <strong id="ddHighestStreak" style="color: var(--primary);">0</strong></p>
+       <button class="btn-logout" id="logoutBtn" type="button">Logout</button>
     </div>
+    
   </div>
         <header>
             <div class="logo"><span class="blossom">🌸</span>Gyan Setu<span class="blossom">🌸</span></div>
@@ -553,10 +556,20 @@
                 </div>
                 <div class="video-display" id="video-display" style="height: 200px;">
                     <div id="youtube-player"></div>
+                    <div id="next-suggestion" style="display:none; margin-top: 10px; background: white; padding: 10px; border-radius: 12px; box-shadow: var(--shadow); cursor: pointer; align-items: center; gap: 10px;">
+    <img id="suggested-thumb" src="" style="width: 80px; border-radius: 8px;">
+    <div>
+        <p style="margin:0; font-size: 0.8rem; color: var(--secondary); font-weight: bold;">Up Next</p>
+        <p id="suggested-title" style="margin:0; font-size: 0.9rem; font-weight: 600; color: var(--text);"></p>
+    </div>
+</div>
                 </div>
                 <div class="video-controls">
     <button class="btn" onclick="window.location.href='http://127.0.0.1:5001/?subject=' + localStorage.getItem('selectedSubject');">StoryBot</button>
 <button class="btn" onclick="window.location.href='http://127.0.0.1:5002/?subject=' + localStorage.getItem('selectedSubject');">Visualizer</button>
+<button class="btn" onclick="window.location.href='flashcards.html?subject=' + localStorage.getItem('selectedSubject');">
+    FlashCards
+</button>
 <button class="btn" onclick="window.location.href='http://127.0.0.1:5003/?subject=' + localStorage.getItem('selectedSubject');">
     Questionnaire
 </button>
@@ -836,6 +849,39 @@ setInterval(async () => {
         addMessage("I'm sorry, I couldn't connect to the chat service.", 'bot');
     }
 
+    // ... inside sendMessageBtn event listener
+try {
+    const videoResponse = await fetch('http://127.0.0.1:5000/visuals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: userTextLower, subject: currentDomain })
+    });
+    const videoData = await videoResponse.json();
+    const videoList = videoData.videos;
+
+    if (videoList.length > 0 && player) {
+        // Load the first video immediately
+        player.loadVideoById(videoList[0].video_id);
+
+        // Show the second video as a suggestion
+        if (videoList.length > 1) {
+            const next = videoList[1];
+            const suggestionBox = document.getElementById('next-suggestion');
+            document.getElementById('suggested-thumb').src = next.thumbnail;
+            document.getElementById('suggested-title').textContent = next.title;
+            suggestionBox.style.display = 'flex';
+            
+            // Make the suggestion clickable to swap videos
+            suggestionBox.onclick = () => {
+                player.loadVideoById(next.video_id);
+                suggestionBox.style.display = 'none';
+            };
+        }
+    }
+} catch (error) {
+    console.error('Error fetching visual data:', error);
+}
+
     try {
         const videoResponse = await fetch('http://127.0.0.1:5000/visuals', {
             method: 'POST',
@@ -1012,28 +1058,103 @@ setInterval(async () => {
 }, 500);
 
 
+// 1. Function to render and cleanup
 function loadAnnouncement() {
-    const announcement = localStorage.getItem('gyansetu_announcement');
     const container = document.getElementById('announcement-container');
-    const textField = document.getElementById('announcement-text');
+    const rawData = localStorage.getItem('gyansetu_announcement_list');
+    const currentUserRaw = localStorage.getItem('currentUser');
 
-    if (announcement && announcement.trim() !== "") {
-        textField.textContent = announcement;
-        container.style.display = 'block';
-    } else {
+    // Basic Validation
+    if (!container || !currentUserRaw) return;
+    const currentUser = JSON.parse(currentUserRaw);
+
+    if (!rawData) {
         container.style.display = 'none';
+        return;
     }
+
+    let announcementList = JSON.parse(rawData);
+    
+    // 1. TODAY'S DATE (Local Timezone - idi refresh ki chala important)
+    const todayStr = new Date().toLocaleDateString(); 
+
+    // 2. FILTER: Only keep messages that match TODAY'S date
+    // Patha roju (Previous day) messages automatic ga ikkade filter ayipothayi
+    const todayMessages = announcementList.filter(data => {
+        const msgDateStr = new Date(data.timestamp).toLocaleDateString();
+        return msgDateStr === todayStr;
+    });
+
+    // 3. STORAGE CLEANUP: 
+    // Okavela patha messages unte, storage ni update chesi clean chestham
+    if (todayMessages.length !== announcementList.length) {
+        localStorage.setItem('gyansetu_announcement_list', JSON.stringify(todayMessages));
+    }
+
+    // 4. DISPLAY LOGIC
+    container.innerHTML = ""; 
+    let hasMessages = false;
+
+    todayMessages.forEach(data => {
+        let show = false;
+        if (data.type === 'all') show = true;
+        if (data.type === 'student' && data.target === currentUser.username) show = true;
+        
+        const userClassSec = `${currentUser.class}-${currentUser.section}`;
+        if (data.type === 'class' && data.target === userClassSec) show = true;
+
+        if (show) {
+            hasMessages = true;
+            const msgCard = document.createElement('div');
+            // Reusing your exact styles
+            msgCard.style.cssText = "background: var(--soft); border-left: 5px solid var(--secondary); padding: 15px 20px; border-radius: 12px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 15px; margin-bottom: 15px;";
+            
+            msgCard.innerHTML = `
+                <i class="fas fa-bullhorn" style="font-size: 1.5rem; color: var(--secondary);"></i>
+                <div style="flex-grow: 1;">
+                    <strong style="color: var(--secondary); display: block;">
+                        Message from ${data.teacher} (${data.subject}):
+                    </strong>
+                    <p style="margin: 5px 0 0; font-weight: 600; color: var(--text);">${data.message}</p>
+                    <small style="color: #888; font-size: 0.75rem;">Sent at: ${new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
+                </div>
+            `;
+            container.appendChild(msgCard);
+        }
+    });
+
+    // Dashboard visibility
+    container.style.display = hasMessages ? 'block' : 'none';
 }
 
-// Update your existing window.onload or add this:
-window.addEventListener('load', loadAnnouncement);
+// --- REFRESH PERSISTENCE FIX ---
+// Page refresh ayina ventane ee code run avthundi
+window.addEventListener('DOMContentLoaded', loadAnnouncement);
 
-// Optional: Listen for storage changes in case the teacher updates it while student is on page
+// Multi-tab synchronization
 window.addEventListener('storage', (e) => {
-    if (e.key === 'gyansetu_announcement') {
+    if (e.key === 'gyansetu_announcement_list') {
         loadAnnouncement();
     }
 });
+
+
+
+
+
+// Inside index.html script
+if (currentUser && currentUser.username) {
+    let fullname = currentUser.fullname || 'No Name';
+    document.getElementById('profileToggle').textContent = fullname.charAt(0).toUpperCase();
+    document.getElementById('ddFullname').textContent = fullname;
+    document.getElementById('ddUsername').textContent = currentUser.username;
+    
+    // Display both current and highest streaks
+    document.getElementById('ddStreak').textContent = currentUser.streak || 0;
+    document.getElementById('ddHighestStreak').textContent = currentUser.highest_streak || 0;
+}
+
+
 </script>
 </body>
 </html>
