@@ -1,86 +1,225 @@
-GYAN SETU execution steps:
+# GYAN SETU – AI-Powered Adaptive E-Learning Platform
 
+GYAN SETU (Wisdom Bridge) is an AI-powered adaptive e-learning platform designed to provide personalized and interactive learning experiences for students.
 
+## 🚀 Project Setup and Execution
 
+Follow the steps below to configure and run the project locally.
 
-MAIN CHATBOT
-1)Creating virtual env
-    python -m venv venv
-    .\venv\Scripts\activate
-    if error occors in the before step put below line  
-    ---------------------------------------------------------------------------------------------------
-    ERROR
-    (& : File D:\SIH 1\venv\Scripts\Activate.ps1 cannot be loaded because running scripts is disabled on this system. For 
-more information, see about_Execution_Policies at https:/go.microsoft.com/fwlink/?LinkID=135170.
-At line:1 char:3
-+ & "D:/SIH 1/venv/Scripts/Activate.ps1"
-+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : SecurityError: (:) [], PSSecurityException
-    + FullyQualifiedErrorId : UnauthorizedAccess)
-    ---------------------------------------------------------------------------------------------------
-    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+### 1. Prerequisites
 
+Make sure the following software is installed on your system:
 
-2)CREATE A .env file and put below
-    GEMINI_API_KEY=your_google_gemini_api_key_here
-    YOUTUBE_API_KEY=your_youtube_data_api_key_here
+- Python 3.x
+- Node.js and npm
+- Visual Studio Code (Recommended)
+- Google Gemini API Key
+- YouTube Data API Key
 
+---
 
-3)pip install Flask
-pip install flask_cors
+## 2. Python Environment Setup
+
+Open the project folder in VS Code and launch the terminal.
+
+### Step 1: Create a Virtual Environment
+
+```powershell
+python -m venv venv
+```
+
+### Step 2: Activate the Virtual Environment
+
+```powershell
+.\venv\Scripts\activate
+```
+
+**If you encounter an Execution Policy error:**
+
+You may see an error stating that running scripts is disabled on this system.
+
+To resolve this, execute:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+```
+
+Then activate the virtual environment again:
+
+```powershell
+.\venv\Scripts\activate
+```
+
+This setting applies only to the current PowerShell session.
+
+### Step 3: Verify Activation
+
+```powershell
+Get-ExecutionPolicy
+```
+
+---
+
+## 3. API Configuration
+
+Create a file named `.env` in the project root directory.
+
+Add the following environment variables:
+
+```env
+GEMINI_API_KEY=your_google_gemini_api_key_here
+YOUTUBE_API_KEY=your_youtube_data_api_key_here
+```
+
+**Important:**
+- Replace the placeholder values with your actual API keys.
+- Never share your API keys publicly.
+- Add `.env` to your `.gitignore` file to prevent accidental uploads to GitHub.
+
+---
+
+## 4. Install Python Dependencies
+
+With the virtual environment activated, install the required packages.
+
+```bash
+pip install Flask
+pip install flask-cors
 pip install python-dotenv
 pip install google-generativeai
 pip install google-api-python-client
+pip install python-docx
+pip install PyPDF2
+```
 
+Alternatively, install all dependencies together:
 
+```bash
+pip install flask flask-cors python-dotenv google-generativeai google-api-python-client python-docx PyPDF2
+```
 
+---
 
+## 5. Running the Python Microservices
 
+GYAN SETU uses separate Flask applications for its different learning features.
 
+Keep the virtual environment activated in every terminal where you run a Python service.
 
-STORYBOT:
-1)pip install Flask
-  pip install google-generativeai
-2)app.py
-3)storybot.html
-4)pip install Flask google-generativeai flask-cors
-5)cd "C:\Users\Lavanya_D\Desktop\SIH 2\SIH 1"
-6)$env:GEMINI_API_KEY="your_key_here"
-7)python app.py
+### 5.1 Main Chatbot
 
-
-EVERYTIME WHILE RUNNING THE CODE:
-    1) Get-ExecutionPolicy
-    2) Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-    3) .\venv\Scripts\activate
-
-
-
-RUNNING CHATBOT:
+```powershell
 $env:FLASK_APP = "chatbot.py"
 python -m flask run
+```
 
+**Default URL:** `http://127.0.0.1:5000`
 
-RUNNING STORYBOT:
+### 5.2 StoryBot
+
+```powershell
 $env:FLASK_APP = "storybot.py"
 python -m flask run --port 5001
+```
 
+**URL:** `http://127.0.0.1:5001`
 
-RUNNING QUIZ:
-$env:FLASK_APP = "quiz.py"
-python -m flask run --port 5003
+### 5.3 Visualizer
 
-
-RUNNING VISUALIZER:
+```powershell
 $env:FLASK_APP = "visualizer.py"
 python -m flask run --port 5002
+```
+
+**URL:** `http://127.0.0.1:5002`
+
+### 5.4 Quiz Module
+
+```powershell
+$env:FLASK_APP = "quiz.py"
+python -m flask run --port 5003
+```
+
+**URL:** `http://127.0.0.1:5003`
+
+**Note:** Run each Flask application in a separate terminal window. This allows all four services to run simultaneously.
+
+---
+
+## 6. StoryBot – Alternative Setup
+
+If you want to run StoryBot independently, follow these steps.
+
+### Step 1: Navigate to the Project Directory
+
+```powershell
+cd "C:\Users\Lavanya_D\Desktop\SIH 2\SIH 1"
+```
+
+Replace the path with your actual project directory.
+
+### Step 2: Install Dependencies
+
+```bash
+pip install Flask google-generativeai flask-cors
+```
+
+### Step 3: Configure the Gemini API Key
+
+```powershell
+$env:GEMINI_API_KEY = "your_key_here"
+```
+
+### Step 4: Run the Application
+
+```bash
+python app.py
+```
+
+Make sure `app.py` and `storybot.html` are placed in their expected locations.
+
+---
+
+## 7. Node.js Backend Setup
+
+GYAN SETU uses Node.js and SQLite for backend operations and database management.
+
+### Step 1: Install Node.js
+
+Download and install Node.js from:
+
+https://nodejs.org/
+
+Verify the installation:
+
+```bash
+node -v
+npm -v
+```
+
+### Step 2: Initialize the Node.js Project
+
+Navigate to the project directory containing `server.js`.
+
+```bash
+npm init -y
+```
+
+### Step 3: Install Required Dependencies
+
+```bash
+npm install express sqlite3 body-parser cors
+```
+
+### Step 4: Start the Node.js Server
+
+```bash
+node server.js
+```
+
+The Node.js backend will start on the port configured in `server.js` (port 3000, if configured accordingly).
+
+---
 
 
-CHATBOT :
-pip install flask flask-cors python-docx PyPDF2 google-generativeai google-api-python-client
 
-
-2) node installation
-npm init -y 
-npm install express sqlite3 body-parser cors   
-node server.js            
